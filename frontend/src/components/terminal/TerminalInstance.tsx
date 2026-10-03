@@ -329,7 +329,10 @@ export function TerminalInstance({
                 "group relative h-full w-full min-h-0 min-w-0 bg-background",
                 // `block` must not be added here: tailwind-merge resolves display clashes by keeping the
                 // last class, which would silently drop `flex` and let the surface size itself by content.
-                isSplitPane ? cn("flex flex-col overflow-hidden", rounding) : "pt-2",
+                // A split pane stacks its header over the surface; a lone terminal has neither a header
+                // nor top padding, so its surface starts on the same line as the sidebar and only the
+                // padding inside it keeps the text off the tab bar above.
+                isSplitPane && cn("flex flex-col overflow-hidden", rounding),
                 isVisible ? undefined : "hidden"
             )}
         >

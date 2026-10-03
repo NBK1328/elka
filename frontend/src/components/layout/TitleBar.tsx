@@ -1,4 +1,4 @@
-import { Plus } from "lucide-react";
+import { PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
 import {
     splitWorkspaceTabID,
     terminalSessionTabID,
@@ -14,7 +14,7 @@ import { NameDialog } from "@/components/layout/NameDialog";
 import { SFTPBrowser } from "@/components/terminal/SFTPBrowser";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { MACOS_TRAFFIC_LIGHTS_WIDTH, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "@/lib/sidebar";
+import { MACOS_TRAFFIC_LIGHTS_WIDTH, SIDEBAR_TOGGLE_COLUMN_WIDTH, SIDEBAR_WIDTH } from "@/lib/sidebar";
 import { useAuthStore } from "@/store/authStore.ts";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -67,12 +67,13 @@ export function TitleBar() {
         removeSessionFromGroup,
         ungroupTabs,
     } = useSessionStore();
-    const {activeView, isSidebarVisible, setActiveView, setSelectedHostGroup} = useUIStore();
+    const {activeView, isSidebarVisible, showSidebarToggle, toggleSidebar, setActiveView, setSelectedHostGroup} = useUIStore();
 
     const isTerminalView = activeView === ViewType.Terminal;
     const isMacOS = typeof navigator !== "undefined" && /Macintosh|Mac OS X/.test(navigator.userAgent);
 
     const {isUnlocked} = useAuthStore();
+    const showSidebarButtonVisible = isUnlocked && showSidebarToggle;
     const {t} = useTranslation(["hosts", "common"]);
 
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -233,28 +234,61 @@ export function TitleBar() {
     const groupByTabID = new Map(tabGroups.map((group) => [terminalTabGroupID(group.id), group]));
     const workspaceByTabID = new Map(workspaces.map((workspace) => [splitWorkspaceTabID(workspace.id), workspace]));
     const activeWorkspace = workspaces.find((workspace) => workspace.id === activeWorkspaceID);
-    // Column the tab bar keeps free on its left: the sidebar rail below it, or on macOS the traffic lights
-    // the system draws there, which stay put while the rail slides. The strip and the drag handle read it,
-    // so both travel with the rail instead of leaving the tab bar stranded at a fixed offset.
-    const railWidth = isMacOS
-        ? MACOS_TRAFFIC_LIGHTS_WIDTH
-        : (isSidebarVisible ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH);
+    // Column of the tab bar that holds the toggle. It is as wide as the rail while the rail is there, so the
+    // button sits right above the section icons, and narrows to the button alone once the rail slides away.
+    const toggleColumnWidth = isSidebarVisible ? SIDEBAR_WIDTH : SIDEBAR_TOGGLE_COLUMN_WIDTH;
+    // macOS draws its window controls over the top left corner of the frame, so the tab bar leaves that
+    // gutter free before the column and it never moves with the rail.
+    const gutterWidth = isMacOS ? MACOS_TRAFFIC_LIGHTS_WIDTH : 0;
 
     return (
         <header className="wails-no-drag relative flex h-14 shrink-0 items-end justify-between bg-background pr-0">
-            <div className="sidebar-transition wails-drag absolute top-0 right-0 z-20 h-4" style={{left: railWidth}} aria-hidden="true"/>
+            <div
+                className="sidebar-transition wails-drag absolute top-0 right-0 z-20 h-4"
+                style={{left: gutterWidth + toggleColumnWidth}}
+                aria-hidden="true"
+            />
 
-            {/* The rail never leaves the frame for good: closed, it still holds the toggle button, so its
-                background stays put and only the width moves. */}
+            {isMacOS && <div className="w-18 shrink-0" aria-hidden="true"/>}
+
+            {/* Doubles as the strip above the rail: it carries the sidebar background while the rail is
+                there and fades back to the plain background once the rail is gone. */}
             <div
                 className={cn(
                     "sidebar-transition relative flex h-full shrink-0 items-center justify-center overflow-hidden",
-                    isMacOS ? "bg-background" : "border-r bg-sidebar"
+                    !isMacOS && (isSidebarVisible ? "border-r bg-sidebar" : "bg-background")
                 )}
-                style={{width: railWidth}}
-                aria-hidden={isMacOS ? "true" : undefined}
+                style={{width: toggleColumnWidth}}
             >
-                {!isMacOS && <div className="absolute bottom-0 h-px w-8 bg-border"/>}
+                {!isMacOS && (
+                    <div
+                        className={cn(
+                            "sidebar-transition absolute bottom-0 h-px w-8",
+                            isSidebarVisible ? "bg-border" : "bg-transparent"
+                        )}
+                    />
+                )}
+
+                {showSidebarButtonVisible && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={toggleSidebar}
+                        className={cn("wails-no-drag", !isSidebarVisible && "text-muted-foreground hover:text-foreground")}
+                        aria-label={isSidebarVisible ? t("hide_sidebar", {ns: "common"}) : t("show_sidebar", {ns: "common"})}
+                        title={isSidebarVisible ? t("hide_sidebar", {ns: "common"}) : t("show_sidebar", {ns: "common"})}
+                    >
+                        {/* Cross-fade, so the button answers the rail sliding the same way it does. */}
+                        <span className="relative block size-5">
+                            <PanelLeftClose
+                                className={cn("sidebar-transition absolute inset-0 size-5", !isSidebarVisible && "scale-90 opacity-0")}
+                            />
+                            <PanelLeftOpen
+                                className={cn("sidebar-transition absolute inset-0 size-5", isSidebarVisible && "scale-90 opacity-0")}
+                            />
+                        </span>
+                    </Button>
+                )}
             </div>
 
             <div ref={scrollRef}

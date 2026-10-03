@@ -197,7 +197,7 @@
 }
 
 .sidebar-transition {
-    transition-property: width, left, border-width, opacity, transform;
+    transition-property: width, left, border-width, background-color, border-color, opacity, transform;
     transition-duration: var(--sidebar-transition-duration);
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }

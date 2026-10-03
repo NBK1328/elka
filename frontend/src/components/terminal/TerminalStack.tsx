@@ -163,11 +163,12 @@ export function TerminalStack({isVisible}: TerminalStackProps) {
                 Panes and dividers share this offset container: it becomes their containing block, so
                 their percentages measure that region. Split panes start flush with the sidebar and step
                 back from the right window edge, so their frames line up and stay visible; a lone
-                terminal keeps the small gap under the tab bar and runs to the window edges.
+                terminal runs to the window edges and keeps only the padding inside the pane, so its top
+                edge sits on the same line as the sidebar.
             */}
             <div className={cn(
-                "absolute bottom-0 left-0",
-                splitWorkspaceActive ? "right-1 top-0" : "right-0 top-2"
+                "absolute bottom-0 left-0 top-0",
+                splitWorkspaceActive ? "right-1" : "right-0"
             )}>
             {sessions.map((session) => {
                 const pane = paneBySession.get(session.id);
