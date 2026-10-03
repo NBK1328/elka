@@ -12,8 +12,9 @@
 
 ## Интерфейс
 
-- `frontend/src/components/layout/Sidebar.tsx` — боковая навигация и подсказки разделов.
+- `frontend/src/components/layout/Sidebar.tsx` — боковая навигация и подсказки разделов. Кнопка сворачивания стоит первым пунктом самой панели: в свёрнутом виде остаётся узкая колонка только с ней, поэтому вернуть панель можно в любой момент. Если переключатель выключен в настройках, панель по инварианту `uiStore` всегда открыта.
 - `frontend/src/components/layout/TitleBar.tsx` — верхние вкладки терминалов, вкладка разделённого пространства и кнопка новой вкладки.
+- `frontend/src/lib/sidebar.ts` — ширина боковой панели, ширина её свёрнутого вида и длительность анимации. Панель, зеркальная полоса в `TitleBar.tsx` и перетаскивание окна берут оттуда свои размеры, а `store/uiStore.ts` держит флаг `isSidebarTransitioning` на время движения: панель прячет подсказки разделов (`overflow-hidden`), а терминалы ждут конца анимации. Переход описан классом `.sidebar-transition` в `assets/main.css`.
 - `frontend/src/components/layout/TerminalTab.tsx` и `SplitWorkspaceTab.tsx` — обычная вкладка SSH и вкладка split-пространства; контекстные меню и перетаскивание вкладок.
 - `frontend/src/components/layout/HostViewPicker.tsx` — меню выбора карточек, списка или дерева.
 - `frontend/src/components/views/HostsPage.tsx` и `HostModal.tsx` — список, группы и форма хоста, включая JumpHost и port forwarding.
@@ -29,7 +30,7 @@
 
 - `frontend/src/store/sessionStore.ts` — SSH-сессии, верхний порядок вкладок и дерево split-пространства. Оно хранится в памяти приложения, поэтому остаётся при переключении разделов, но не является постоянной настройкой vault.
 - `frontend/src/components/terminal/TerminalStack.tsx` — размещение split-панелей и изменение их размеров.
-- `frontend/src/components/terminal/TerminalInstance.tsx` — xterm, ввод/вывод SSH, подгонка размеров, drag-and-drop и действия панели. Пока идёт SSH-хендшейк, поверх терминала показывается лоадер подключения, а при ошибке терминал всё равно подгоняется под размер, чтобы текст ошибки был виден.
+- `frontend/src/components/terminal/TerminalInstance.tsx` — xterm, ввод/вывод SSH, подгонка размеров, drag-and-drop и действия панели. Пока идёт SSH-хендшейк, поверх терминала показывается лоадер подключения, а при ошибке терминал всё равно подгоняется под размер, чтобы текст ошибки был виден. Пока сворачивается боковая панель, подгонка по `ResizeObserver` пропускается: кадры анимации не перерисовывают экран, а одна подгонка ждёт конца движения.
 - `frontend/src/lib/sshConnection.ts` — разрешение учётных данных хоста/группы, ключей, цепочки JumpHost и port forwards для подключения.
 - `backend/internal/services/ssh/ssh.go` — SSH-соединение, цепочка промежуточных серверов и локальная/удалённая переадресация портов.
 

@@ -1,4 +1,4 @@
-import { PanelLeftClose, PanelLeftOpen, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
     splitWorkspaceTabID,
     terminalSessionTabID,
@@ -14,6 +14,7 @@ import { NameDialog } from "@/components/layout/NameDialog";
 import { SFTPBrowser } from "@/components/terminal/SFTPBrowser";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { MACOS_TRAFFIC_LIGHTS_WIDTH, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "@/lib/sidebar";
 import { useAuthStore } from "@/store/authStore.ts";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -66,14 +67,12 @@ export function TitleBar() {
         removeSessionFromGroup,
         ungroupTabs,
     } = useSessionStore();
-    const {activeView, isSidebarVisible, showSidebarToggle, toggleSidebar, setActiveView, setSelectedHostGroup} = useUIStore();
+    const {activeView, isSidebarVisible, setActiveView, setSelectedHostGroup} = useUIStore();
 
     const isTerminalView = activeView === ViewType.Terminal;
-    const showSidebarStyling = isSidebarVisible;
     const isMacOS = typeof navigator !== "undefined" && /Macintosh|Mac OS X/.test(navigator.userAgent);
 
     const {isUnlocked} = useAuthStore();
-    const showSidebarButtonVisible = isUnlocked && showSidebarToggle;
     const {t} = useTranslation(["hosts", "common"]);
 
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -234,19 +233,28 @@ export function TitleBar() {
     const groupByTabID = new Map(tabGroups.map((group) => [terminalTabGroupID(group.id), group]));
     const workspaceByTabID = new Map(workspaces.map((workspace) => [splitWorkspaceTabID(workspace.id), workspace]));
     const activeWorkspace = workspaces.find((workspace) => workspace.id === activeWorkspaceID);
+    // Column the tab bar keeps free on its left: the sidebar rail below it, or on macOS the traffic lights
+    // the system draws there, which stay put while the rail slides. The strip and the drag handle read it,
+    // so both travel with the rail instead of leaving the tab bar stranded at a fixed offset.
+    const railWidth = isMacOS
+        ? MACOS_TRAFFIC_LIGHTS_WIDTH
+        : (isSidebarVisible ? SIDEBAR_WIDTH : SIDEBAR_COLLAPSED_WIDTH);
 
     return (
         <header className="wails-no-drag relative flex h-14 shrink-0 items-end justify-between bg-background pr-0">
-            <div className="wails-drag absolute top-0 right-0 left-[72px] z-20 h-4" aria-hidden="true"/>
+            <div className="sidebar-transition wails-drag absolute top-0 right-0 z-20 h-4" style={{left: railWidth}} aria-hidden="true"/>
 
+            {/* The rail never leaves the frame for good: closed, it still holds the toggle button, so its
+                background stays put and only the width moves. */}
             <div
                 className={cn(
-                    "relative flex h-full w-14 shrink-0 items-center justify-center",
-                    isMacOS ? "w-18" : showSidebarStyling && "border-r bg-sidebar"
+                    "sidebar-transition relative flex h-full shrink-0 items-center justify-center overflow-hidden",
+                    isMacOS ? "bg-background" : "border-r bg-sidebar"
                 )}
+                style={{width: railWidth}}
                 aria-hidden={isMacOS ? "true" : undefined}
             >
-                {!isMacOS && showSidebarStyling && <div className="absolute bottom-0 h-px w-8 bg-border"/>}
+                {!isMacOS && <div className="absolute bottom-0 h-px w-8 bg-border"/>}
             </div>
 
             <div ref={scrollRef}
@@ -344,22 +352,7 @@ export function TitleBar() {
                 )}
             </div>
 
-            {showSidebarButtonVisible && (
-                <div className="flex h-full shrink-0 items-center pr-1">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleSidebar}
-                        className="wails-no-drag text-muted-foreground hover:text-foreground"
-                        aria-label={isSidebarVisible ? t("hide_sidebar", {ns: "common"}) : t("show_sidebar", {ns: "common"})}
-                        title={isSidebarVisible ? t("hide_sidebar", {ns: "common"}) : t("show_sidebar", {ns: "common"})}
-                    >
-                        {isSidebarVisible ? <PanelLeftClose className="size-5"/> : <PanelLeftOpen className="size-5"/>}
-                    </Button>
-                </div>
-            )}
-
-            <WindowControls className={showSidebarButtonVisible ? "" : "ml-12"}/>
+            <WindowControls/>
             <NameDialog
                 open={groupDialogOpen}
                 title={t("new_tab_group_name", {ns: "terminal"})}

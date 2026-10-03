@@ -191,11 +191,21 @@
     --info-foreground: oklch(1 0 0);
     --success: oklch(0.72 0.19 150);
     --success-foreground: oklch(1 0 0);
-
-    /* Split pane frames. applyAppAppearance replaces them once the settings arrive; these values
-       only cover the very first paint of the terminal view. */
     --split-pane-border: #3f3f46;
     --split-pane-border-active: #d4d4d8;
+    --sidebar-transition-duration: 200ms;
+}
+
+.sidebar-transition {
+    transition-property: width, left, border-width, opacity, transform;
+    transition-duration: var(--sidebar-transition-duration);
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar-transition {
+        transition-duration: 0ms;
+    }
 }
 
 @layer base {

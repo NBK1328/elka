@@ -1,0 +1,7 @@
+export const SIDEBAR_WIDTH = 56;
+
+export const SIDEBAR_COLLAPSED_WIDTH = 40;
+
+export const SIDEBAR_TRANSITION_MS = 200;
+
+export const MACOS_TRAFFIC_LIGHTS_WIDTH = 72;

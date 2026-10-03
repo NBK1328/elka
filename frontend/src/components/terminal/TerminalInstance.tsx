@@ -55,6 +55,7 @@ export function TerminalInstance({
 }: TerminalInstanceProps) {
     const {t} = useTranslation("terminal");
     const appearance = useUIStore((state) => state.appearance);
+    const isSidebarTransitioning = useUIStore((state) => state.isSidebarTransitioning);
     const rounding = isSplitPane ? PANE_RADIUS : "rounded-t-xl";
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -296,10 +297,18 @@ export function TerminalInstance({
     }, [isActive, isConnecting, isVisible, sessionId]);
 
     useEffect(() => {
+        if (isSidebarTransitioning) return;
+        fitAndResizeRef.current(true);
+    }, [isSidebarTransitioning]);
+
+    useEffect(() => {
         const container = containerRef.current;
         if (!container || !isVisible || isConnecting) return;
 
-        const resizeObserver = new ResizeObserver(() => fitAndResizeRef.current());
+        const resizeObserver = new ResizeObserver(() => {
+            if (useUIStore.getState().isSidebarTransitioning) return;
+            fitAndResizeRef.current();
+        });
         resizeObserver.observe(container);
         return () => resizeObserver.disconnect();
     }, [isActive, isConnecting, isVisible, sessionId]);

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { getInitialAppearance } from "@/lib/appearance";
 import type { AppearanceSettings } from "@/lib/appearance";
+import { SIDEBAR_TRANSITION_MS } from "@/lib/sidebar";
 
 export enum ViewType {
     Hosts = "hosts",
@@ -13,9 +14,22 @@ export enum ViewType {
 
 export type HostViewMode = "cards" | "list" | "tree";
 
+let sidebarTransitionTimer: ReturnType<typeof setTimeout> | undefined;
+
+function beginSidebarTransition() {
+    if (sidebarTransitionTimer) clearTimeout(sidebarTransitionTimer);
+    sidebarTransitionTimer = setTimeout(() => {
+        sidebarTransitionTimer = undefined;
+        useUIStore.setState({isSidebarTransitioning: false});
+    }, SIDEBAR_TRANSITION_MS);
+
+    return {isSidebarTransitioning: true};
+}
+
 interface UIState {
     activeView: ViewType;
     isSidebarVisible: boolean;
+    isSidebarTransitioning: boolean;
     updateVersionReady: string | null;
     showHostGroups: boolean;
     showSidebarToggle: boolean;
@@ -37,6 +51,7 @@ interface UIState {
 export const useUIStore = create<UIState>((set) => ({
     activeView: ViewType.Hosts,
     isSidebarVisible: true,
+    isSidebarTransitioning: false,
     updateVersionReady: null,
     showHostGroups: true,
     showSidebarToggle: true,
@@ -55,6 +70,9 @@ export const useUIStore = create<UIState>((set) => ({
     setHostViewMode: (mode) => set({hostViewMode: mode}),
     setGroupViewMode: (mode) => set({groupViewMode: mode}),
     setAppearance: (appearance) => set({appearance}),
-    toggleSidebar: () => set((state) => ({isSidebarVisible: !state.isSidebarVisible})),
+    toggleSidebar: () => set((state) => ({
+        isSidebarVisible: !state.isSidebarVisible,
+        ...beginSidebarTransition(),
+    })),
     setUpdateVersionReady: (version) => set({ updateVersionReady: version }),
 }));
