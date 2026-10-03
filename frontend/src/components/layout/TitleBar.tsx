@@ -53,6 +53,7 @@ export function TitleBar() {
         setActiveSession,
         removeSession,
         duplicateSession,
+        reconnectSession,
         closeOtherSessions,
         addSessionToSplit,
         placeSessionBeside,
@@ -349,10 +350,15 @@ export function TitleBar() {
                             onClick={() => setActiveSession(session.id)}
                             onClose={() => removeSession(session.id)}
                             onDuplicate={() => duplicateSession(session.id)}
+                            onReconnect={() => reconnectSession(session.id)}
                             onCloseOthers={() => closeOtherSessions(session.id)}
                             canCloseOthers={sessions.length > 1}
                             isInSplit={false}
                             canAddToSplit={!activeWorkspace || splitPaneCount(activeWorkspace.layout) < 6}
+                            onCreateSplit={() => {
+                                createSplitWorkspace(t("split_workspace_default_title", {ns: "terminal", number: workspaces.length + 1}));
+                                addSessionToSplit(session.id);
+                            }}
                             onToggleSplit={() => addSessionToSplit(
                                 session.id,
                                 activeWorkspaceID || undefined,

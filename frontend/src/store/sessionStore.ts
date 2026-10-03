@@ -20,6 +20,8 @@ export interface TerminalSession {
     id: string;
     title: string;
     config: SSHConnectionConfig;
+    /** Bumped on reconnect: it changes the terminal instance key, which redials the session. */
+    reconnectCount: number;
 }
 
 export interface CreateSessionParams {
@@ -78,6 +80,7 @@ interface SessionState {
     removeSessionFromGroup: (sessionID: string) => void;
     ungroupTabs: (groupID: string) => void;
     duplicateSession: (id: string) => void;
+    reconnectSession: (id: string) => void;
     closeOtherSessions: (id: string) => void;
     removeSession: (id: string) => void;
     setActiveSession: (id: string) => void;
@@ -230,6 +233,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             id: newId,
             title: params.title || params.host,
             config: fullConfig,
+            reconnectCount: 0,
         };
 
         useUIStore.getState().setActiveView(ViewType.Terminal);
@@ -555,6 +559,19 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             topTabOrder,
         };
     }),
+
+    // Reconnect reuses the mount/cleanup cycle of the terminal: the current session is closed and a
+    // new one is opened inside the same tab, which also retries a session that failed to connect.
+    reconnectSession: (id) => {
+        if (!get().sessions.some((session) => session.id === id)) return;
+
+        get().setActiveSession(id);
+        set((state) => ({
+            sessions: state.sessions.map((session) => session.id === id
+                ? {...session, reconnectCount: session.reconnectCount + 1}
+                : session),
+        }));
+    },
 
     setActiveSession: (id) => {
         useUIStore.getState().setActiveView(ViewType.Terminal);

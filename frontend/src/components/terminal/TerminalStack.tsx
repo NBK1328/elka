@@ -1,9 +1,10 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { useSessionStore } from "@/store/sessionStore";
 import type { TerminalSplitLayout } from "@/store/sessionStore";
 import { TerminalInstance } from "@/components/terminal/TerminalInstance";
+import { SFTPBrowser } from "@/components/terminal/SFTPBrowser";
 import { cn } from "@/lib/utils";
 
 interface TerminalStackProps {
@@ -108,7 +109,11 @@ export function TerminalStack({isVisible}: TerminalStackProps) {
         placeSessionBeside,
         removeSessionFromSplit,
         removeSession,
+        reconnectSession,
+        duplicateSession,
+        closeOtherSessions,
     } = useSessionStore();
+    const [sftpsessionID, setSFTPSessionID] = useState<string | null>(null);
     const dragRef = useRef<ResizeDrag | null>(null);
     const activeWorkspace = workspaces.find((workspace) => workspace.id === activeWorkspaceID);
     const layout = activeWorkspaceID
@@ -183,8 +188,10 @@ export function TerminalStack({isVisible}: TerminalStackProps) {
                 } : undefined;
 
                 return (
+                    // The reconnect counter is part of the key on purpose: a new key remounts the
+                    // instance, which closes the old SSH session and opens a fresh one in this tab.
                     <TerminalInstance
-                        key={session.id}
+                        key={`${session.id}:${session.reconnectCount}`}
                         sessionId={session.id}
                         config={session.config}
                         isActive={session.id === activeSessionId}
@@ -196,6 +203,10 @@ export function TerminalStack({isVisible}: TerminalStackProps) {
                         onFocus={() => setActiveSession(session.id)}
                         onDetachPane={() => activeWorkspaceID && removeSessionFromSplit(activeWorkspaceID, session.id)}
                         onCloseSession={() => removeSession(session.id)}
+                        onReconnect={() => reconnectSession(session.id)}
+                        onDuplicate={() => duplicateSession(session.id)}
+                        onOpenSFTP={() => setSFTPSessionID(session.id)}
+                        onCloseOthers={() => closeOtherSessions(session.id)}
                         onDropSession={(draggedID, targetID, placement) => {
                             if (activeWorkspaceID) placeSessionBeside(activeWorkspaceID, targetID, draggedID, placement);
                         }}
@@ -228,6 +239,11 @@ export function TerminalStack({isVisible}: TerminalStackProps) {
                 />
             ))}
             </div>
+            <SFTPBrowser
+                open={!!sftpsessionID}
+                session={sessions.find((session) => session.id === sftpsessionID) || null}
+                onClose={() => setSFTPSessionID(null)}
+            />
         </div>
     );
 }

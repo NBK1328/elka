@@ -1,6 +1,7 @@
 {
   "error_message": "Ошибка: {{message}}\r\n{{error}}",
   "connecting_to_host": "Подключение к {{host}}…",
+  "reconnect": "Переподключить",
   "duplicate_tab": "Дублировать вкладку",
   "add_to_split": "Добавить в разделённый экран",
   "remove_from_split": "Убрать с разделённого экрана",

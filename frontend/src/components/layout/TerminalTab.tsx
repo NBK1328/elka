@@ -1,4 +1,4 @@
-import { Columns2, CopyPlus, FolderOpen, X } from "lucide-react";
+import { Columns2, CopyPlus, FolderOpen, RefreshCw, SquareSplitHorizontal, X } from "lucide-react";
 import { cva } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import {
@@ -47,10 +47,12 @@ interface TerminalTabProps {
     onClick: () => void;
     onClose: () => void;
     onDuplicate: () => void;
+    onReconnect: () => void;
     onCloseOthers: () => void;
     canCloseOthers: boolean;
     isInSplit: boolean;
     canAddToSplit: boolean;
+    onCreateSplit: () => void;
     onToggleSplit: () => void;
     dropEdge: "before" | "after" | null;
     isDropTarget: boolean;
@@ -60,7 +62,7 @@ interface TerminalTabProps {
     onOpenSFTP: () => void;
 }
 
-export function TerminalTab({session, isActive, onClick, onClose, onDuplicate, onCloseOthers, canCloseOthers, isInSplit, canAddToSplit, onToggleSplit, dropEdge, isDropTarget, groups, onCreateGroup, onMoveToGroup, onOpenSFTP}: TerminalTabProps) {
+export function TerminalTab({session, isActive, onClick, onClose, onDuplicate, onReconnect, onCloseOthers, canCloseOthers, isInSplit, canAddToSplit, onCreateSplit, onToggleSplit, dropEdge, isDropTarget, groups, onCreateGroup, onMoveToGroup, onOpenSFTP}: TerminalTabProps) {
     const {t} = useTranslation("terminal");
     const state = isActive ? "active" : "inactive";
 
@@ -99,6 +101,9 @@ export function TerminalTab({session, isActive, onClick, onClose, onDuplicate, o
             </ContextMenuPrimitive.Trigger>
             <ContextMenuPrimitive.Portal>
                 <ContextMenuPanel className="z-50 min-w-48 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none">
+                    <ContextMenuAction onSelect={onReconnect} className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground">
+                        <RefreshCw className="size-4"/>{t("reconnect")}
+                    </ContextMenuAction>
                     <ContextMenuAction onSelect={onDuplicate} className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground">
                         <CopyPlus className="size-4"/>{t("duplicate_tab")}
                     </ContextMenuAction>
@@ -114,6 +119,13 @@ export function TerminalTab({session, isActive, onClick, onClose, onDuplicate, o
                             {t("move_tab_to_group", {name: group.title})}
                         </ContextMenuAction>
                     ))}
+                    <ContextMenuAction
+                        disabled={!canAddToSplit}
+                        onSelect={onCreateSplit}
+                        className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                    >
+                        <SquareSplitHorizontal className="size-4"/>{t("new_split_workspace")}
+                    </ContextMenuAction>
                     <ContextMenuAction
                         disabled={!isInSplit && !canAddToSplit}
                         onSelect={onToggleSplit}

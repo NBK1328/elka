@@ -542,6 +542,9 @@ func resolveSFTPPath(client *sftp.Client, requested string) (string, error) {
 	return path.Join(workingDirectory, requested), nil
 }
 
+// Disconnect tears the session down on request from the UI. It deliberately does not emit the closed
+// event: that event means the session ended on its own (see cleanupSession) and the UI reacts to it
+// by dropping the tab, which would close a tab the user asked to reconnect instead.
 func (s *SshService) Disconnect(sessionID string) {
 	s.mu.Lock()
 	active, exists := s.sessions[sessionID]
@@ -555,7 +558,6 @@ func (s *SshService) Disconnect(sessionID string) {
 		_ = active.session.Close()
 		_ = active.client.Close()
 		closeJumpClients(active.jumpClients)
-		s.emitter.EmitClosed(sessionID)
 	}
 }
 

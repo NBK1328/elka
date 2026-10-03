@@ -1,6 +1,7 @@
 {
   "error_message": "Error: {{message}}\r\n{{error}}",
   "connecting_to_host": "Connecting to {{host}}…",
+  "reconnect": "Reconnect",
   "duplicate_tab": "Duplicate tab",
   "add_to_split": "Add to split view",
   "remove_from_split": "Remove from split view",
