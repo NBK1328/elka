@@ -125,9 +125,9 @@ export function TitleBar() {
             if (!drag.moved && Math.hypot(moveEvent.clientX - drag.startX, moveEvent.clientY - drag.startY) < 5) return;
             if (!drag.moved) {
                 drag.moved = true;
-                // Перенос вкладки идёт на pointer-событиях, поэтому системная картинка перетаскивания
-                // тут не появляется: без своей плашки под курсором перенос выглядит как обычное
-                // движение мыши, и непонятно, что вкладку вообще можно куда-то донести.
+                // The tab drag runs on pointer events, so the native drag image never shows up
+                // here: without a ghost of our own the drag looks like plain mouse movement and it
+                // is unclear the tab can be carried anywhere at all.
                 if (drag.sessionID) {
                     const session = sessions.find((item) => item.id === drag.sessionID);
                     showSessionDragGhost(session?.title || drag.tabID);
@@ -219,13 +219,13 @@ export function TitleBar() {
             window.removeEventListener("pointerup", finishDrag);
             window.removeEventListener("pointercancel", finishDrag);
             window.removeEventListener("blur", cancelDrag);
-            // Снимается здесь, а не только на успешном drop: прерванный перенос (Esc, потеря фокуса
-            // окна) иначе оставил бы плашку висеть поверх интерфейса.
+            // Cleared here and not only on a successful drop: an interrupted drag (Esc, window
+            // losing focus) would otherwise leave the ghost floating over the interface.
             tab.removeAttribute("data-top-tab-dragging");
             hideSessionDragGhost();
         };
-        // Отпущенная кнопка вне окна не доносит pointerup, и перенос иначе завис бы вместе с
-        // плашкой под курсором, пока пользователь не вернётся в приложение.
+        // A button released outside the window never delivers pointerup, and the drag would
+        // otherwise hang along with the ghost until the user comes back to the app.
         const cancelDrag = () => {
             drag.cleanUp();
             clearPreview();

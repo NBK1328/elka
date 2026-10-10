@@ -581,9 +581,9 @@ export const useSessionStore = create<SessionState>((set, get) => ({
             else activeSessionId = newSessions.find((session) => !workspaces.some((workspace) => paneIDs(workspace.layout).includes(session.id)))?.id || null;
         }
 
-        // Закрытие последней одиночной вкладки не должно оставлять под собой пустой фон. Все
-        // оставшиеся сессии лежат в разделённом экране, а он не был активен, поэтому показываем
-        // его — то же место, куда мы уходим на список хостов, когда закрыты вообще все терминалы.
+        // Closing the last standalone tab must not leave an empty background behind. Every remaining
+        // session sits in a split screen that was not active, so we show it: the same place we fall
+        // back to the host list when all terminals are closed.
         if (!activeSessionId && newSessions.length > 0) {
             const fallbackWorkspace = workspaces.find((workspace) => workspace.id === activeWorkspaceID && paneIDs(workspace.layout).length > 0)
                 || workspaces.find((workspace) => paneIDs(workspace.layout).length > 0);

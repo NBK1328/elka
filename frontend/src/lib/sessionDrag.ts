@@ -1,15 +1,17 @@
 /**
- * Перетаскиваемый терминал должен быть виден под курсором, иначе перенос неотличим от обычного
- * движения мыши. Путей переноса два, и у них разные ограничения:
+ * A dragged terminal has to stay visible under the cursor, otherwise the drag is indistinguishable
+ * from plain mouse movement. There are two drag paths, each with its own constraints:
  *
- *  - Вкладка верхнего трея тянется собственными pointer-событиями: браузерный drag there не
- *    работает, поэтому картинку под курсором рисуем сами.
- *  - Шапка панели разделённого экрана тянется штатным HTML5 drag, и там картинку рисует браузер,
- *    но берёт её с элемента-источника: у шапки это узкая полоска в 24px, и перенос панели выглядит
- *    как случайное выделение. Поэтому картинка подменяется через setDragImage.
+ *  - A tab in the top tray is dragged with our own pointer events: the browser drag does not work
+ *    there, so we draw the image under the cursor ourselves.
+ *  - The header of a split-screen pane is dragged with the native HTML5 drag, where the browser
+ *    draws the image but takes it from the source element: for a header that is a 24px strip, and
+ *    dragging a pane would look like stray text selection. So the image is swapped in through
+ *    setDragImage.
  *
- * Общий слой рисуется прямо в DOM, а не через React: указатель шлёт события чаще, чем кадров
- * отображается, и ререндер трея вкладок на каждом движении заметно бы тормозил перенос.
+ * The shared layer is drawn straight into the DOM rather than through React: the pointer delivers
+ * events more often than the screen refreshes, and re-rendering the tab tray on every move would
+ * noticeably slow the drag down.
  */
 
 const GHOST_CLASSES = [
@@ -18,7 +20,7 @@ const GHOST_CLASSES = [
     "text-xs font-medium text-popover-foreground shadow-lg",
 ].join(" ");
 
-/** Насколько призрак смещён относительно курсора, чтобы он не наезжал на подсветку вставки. */
+/** How far the ghost is offset from the cursor so it does not cover the drop highlight. */
 const GHOST_OFFSET = {x: 12, y: 10};
 
 let overlay: HTMLDivElement | null = null;
@@ -31,15 +33,15 @@ function buildGhost(label: string): HTMLDivElement {
 }
 
 /**
- * Показывает картинку переноса под курсором. Вызывается один раз в начале перетаскивания,
- * дальше она только двигается вызовами moveSessionDragGhost.
+ * Shows the drag image under the cursor. Called once at the start of a drag, after which the image
+ * is only moved by calls to moveSessionDragGhost.
  */
 export function showSessionDragGhost(label: string): void {
     hideSessionDragGhost();
 
     overlay = buildGhost(label);
-    // Первый кадр уводим за пределы окна: призрак должен появиться сразу под нужным размером,
-    // иначе он дёргается из левого верхнего угла на первом же движении.
+    // The first frame is parked outside the window: the ghost has to appear at the right size right
+    // away, otherwise it jumps in from the top left corner on the very first move.
     overlay.style.transform = "translate3d(-9999px, -9999px, 0)";
     document.body.appendChild(overlay);
 }
@@ -47,7 +49,7 @@ export function showSessionDragGhost(label: string): void {
 export function moveSessionDragGhost(clientX: number, clientY: number): void {
     if (!overlay) return;
 
-    // Только transform: он не вызывает пересчёт раскладки, в отличие от left/top.
+    // transform only: unlike left/top it does not trigger a layout recalculation.
     overlay.style.transform = `translate3d(${clientX - GHOST_OFFSET.x}px, ${clientY - GHOST_OFFSET.y}px, 0)`;
 }
 
@@ -57,11 +59,11 @@ export function hideSessionDragGhost(): void {
 }
 
 /**
- * Подменяет картинку штатного HTML5-перетаскивания на такую же плашку, как у pointer-переноса.
+ * Swaps the native HTML5 drag image for the same ghost the pointer drag uses.
  *
- * Элемент должен быть отрисован в момент вызова: движок снимает его с картинки не сразу, а на
- * следующем кадре, поэтому узел остаётся в документе до конца перетаскивания и убирается по
- * dragend. Страховка по таймеру нужна на случай, если перетаскивание оборвалось не событием.
+ * The element has to be laid out at the moment of the call: the engine snapshots it not
+ * immediately but on the next frame, so the node stays in the document until the drag ends and is
+ * removed on dragend. The timer is a fallback in case the drag is cut off without an event.
  */
 export function attachSessionDragImage(event: {dataTransfer: DataTransfer}, label: string): void {
     const ghost = buildGhost(label);

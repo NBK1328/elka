@@ -257,9 +257,9 @@ body,
     outline-offset: -4px;
 }
 
-/* Источник переноса гаснет: пока вкладка едет под курсором, её хорошо видно в трее — иначе
-   непонятно, какая именно вкладка переносится в разделённый экран. Метку ставит TitleBar
-   напрямую на узел, без ререндера трея на каждом движении указателя. */
+/* The drag source dims: while a tab travels under the cursor it stays easy to see in the tray,
+   otherwise it is unclear which tab is being moved into the split view. TitleBar sets the flag on
+   the node directly, without re-rendering the tray on every pointer move. */
 [data-top-tab-dragging="true"] {
     opacity: 0.4;
 }

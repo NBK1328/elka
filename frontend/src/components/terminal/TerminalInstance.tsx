@@ -83,8 +83,8 @@ export function TerminalInstance({
     // HTML5 drags set this locally; a drag that starts in the tab bar writes the store instead, because
     // the pointer never crosses the pane as an HTML5 drag event. Both end up in the same highlight.
     const [dropPlacement, setDropPlacement] = useState<SplitPlacement | null>(null);
-    // Панель гаснет на время переноса: без этого источник и цель выглядят одинаково, и перенос
-    // панели не читается. Состояние локальное, ререндерится только шапка панели.
+    // The pane dims for the duration of the drag: otherwise source and target look alike and the pane
+    // drag is unreadable. The state is local, so only the pane header re-renders.
     const [isPaneDragging, setIsPaneDragging] = useState(false);
     const paneDropPreview = useUIStore((state) => state.paneDropPreview);
     const previewPlacement = isSplitPane && paneDropPreview?.paneID === sessionId ? paneDropPreview.placement : null;
@@ -145,9 +145,9 @@ export function TerminalInstance({
         if (!isSplitPane || !event.dataTransfer.types.includes(TERMINAL_SESSION_DRAG_TYPE)) return;
         event.preventDefault();
         event.dataTransfer.dropEffect = "move";
-        // Своя картинка задаётся через setDragImage, но WebKit рисует перенос из text/plain и
-        // игнорирует setDragImage, если этот тип не задан: тогда под курсором появляется название
-        // сессии. В Chromium выигрывает setDragImage, и текст нужен только как этот запасной путь.
+        // The drag image is set through setDragImage, but WebKit renders the drag from text/plain and
+        // ignores setDragImage when that type is missing: the session title would then follow the
+        // cursor. In Chromium setDragImage wins, so the text is only there as a fallback.
         event.dataTransfer.setData("text/plain", paneTitle || config.host);
         setDropPlacement(paneDropPlacement(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY));
     };
@@ -412,8 +412,8 @@ export function TerminalInstance({
                         onDragStart={(event) => {
                             event.dataTransfer.setData(TERMINAL_SESSION_DRAG_TYPE, sessionId);
                             event.dataTransfer.effectAllowed = "move";
-                            // Системная картинка берётся с узла-источника, а источник здесь — шапка
-                            // в 24px высотой, и перенос читался бы как случайное выделение текста.
+                            // The native drag image is taken from the source node, and here the source is a 24px
+                            // tall header, so dragging a pane would read as stray text selection.
                             attachSessionDragImage(event, paneTitle || config.host);
                             setIsPaneDragging(true);
                         }}

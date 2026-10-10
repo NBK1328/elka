@@ -55,9 +55,10 @@ export function Sidebar() {
     const {activeView, setActiveView, isSidebarVisible, setSelectedHostGroup} = useUIStore();
 
     return (
-        // Анимируется только ширина: содержимое живёт во внутреннем блоке фиксированной ширины,
-        // поэтому иконки и метрики не сжимаются вместе с панелью, а подсказки по-прежнему могут
-        // выезжать за её край, пока панель раскрыта.
+        // Only the width is animated: the content lives in an inner block of fixed width, so icons and
+        // metrics never squeeze together with the panel, and tooltips can still stick out past its
+        // edge while the panel is open. The content fades on the same duration as the panel and
+        // slightly later, otherwise the icons vanish before the panel has finished collapsing.
         <aside
             className={cn(
                 "wails-no-drag relative z-30 flex shrink-0 flex-col",
@@ -68,17 +69,17 @@ export function Sidebar() {
         >
             <div className="pointer-events-none absolute inset-0 rounded-t-xl bg-sidebar" aria-hidden="true"/>
 
-            {/* Нижние элементы панели держат тот же отступ от нижней границы вкладки при любой её
-                высоте: значение выведено из --tab-height в main.css. */}
+            {/* Bottom items keep the same offset from the bottom edge of the tab at any tab height: the value
+                is derived from --tab-height in main.css. */}
             <div className={cn(
                 "relative z-10 flex h-full w-14 shrink-0 flex-col items-center justify-between pb-[var(--sidebar-bottom)] pt-2",
-                // Уезжает влево и гаснет вместе с шириной панели: на первом кадре схлопывания всё
-                // ещё видно, поэтому подсказка под курсором не обрезается наполовину.
-                "transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none",
-                isSidebarVisible ? "opacity-100" : "pointer-events-none -translate-x-2 opacity-0"
+                // Slides out to the left and fades on the same duration as the panel, with a delay on
+                // the way out so the icons do not disappear before the panel has finished collapsing.
+                "transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none",
+                isSidebarVisible ? "opacity-100 delay-100" : "pointer-events-none -translate-x-full opacity-0 delay-0"
             )}>
-            {/* Иконки и показатели лежат в одной группе, но ширины у них разные: ширина панели
-                    не должна растягивать список иконок, иначе те съезжают с центра. */}
+            {/* Icons and metrics share one group, but their widths differ: the panel width must not
+                    stretch the icon list, or the icons drift off centre. */}
                 <div className="flex flex-col items-center gap-3">
                     <nav className="flex flex-col items-center gap-2">
                         <SidebarItem
@@ -117,8 +118,8 @@ export function Sidebar() {
                         </SidebarItem>
                     </nav>
 
-                    {/* Показатели стоят под последней иконкой, а не у нижнего края: так они рядом
-                        с той вкладкой, к которой относятся. */}
+                    {/* Metrics sit under the last icon rather than at the bottom edge, so they stay next to the tab
+                        they belong to. */}
                     <ServerMetricsPanel/>
                 </div>
 
