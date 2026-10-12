@@ -17,6 +17,11 @@ type SSHDataPayload struct {
 	Data string `json:"data"`
 }
 
+type SSHConnectedPayload struct {
+	ID            string `json:"id"`
+	RemoteAddress string `json:"remoteAddress"`
+}
+
 type SSHClosedPayload struct {
 	ID string `json:"id"`
 }
@@ -51,6 +56,7 @@ type SSHMetricsPayload struct {
 }
 
 const (
+	SSHConnectedEvent = "ssh:connected"
 	SSHDataEvent      = "ssh:data"
 	SSHClosedEvent    = "ssh:closed"
 	SSHMetricsEvent   = "ssh:metrics"
@@ -59,6 +65,13 @@ const (
 
 func NewWailsSSHEmitter(app *application.App) *WailsSSHEmitter {
 	return &WailsSSHEmitter{app: app}
+}
+
+func (e *WailsSSHEmitter) EmitConnected(sessionID, remoteAddress string) {
+	e.app.Event.Emit(SSHConnectedEvent, SSHConnectedPayload{
+		ID:            sessionID,
+		RemoteAddress: remoteAddress,
+	})
 }
 
 func (e *WailsSSHEmitter) EmitData(sessionID string, data []byte) {

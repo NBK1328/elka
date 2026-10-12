@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronDown, ChevronRight, FolderPlus, FolderTree, Plus, Search, X } from "lucide-react";
+import { ChevronRight, FolderPlus, FolderTree, Plus, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { HostCard } from "@/components/views/HostCard";
@@ -18,6 +18,7 @@ import { HostViewPicker } from "@/components/layout/HostViewPicker";
 import { HostViewMode, useUIStore } from "@/store/uiStore";
 import { saveHostViewPreference } from "@/lib/viewSettings";
 import { handleAppError } from "@/lib/error";
+import { cn } from "@/lib/utils";
 
 export function HostsPage() {
     const {t} = useTranslation(["hosts", "common"]);
@@ -230,41 +231,60 @@ export function HostsPage() {
             )}
             {displayedViewMode === "tree" && (
                 <div className="flex w-full flex-col gap-4">
-                    {treeGroups.map(([groupName, groupHosts]) => (
-                        <section key={groupName || "ungrouped"}>
-                            <button
-                                type="button"
-                                aria-expanded={expandedTreeGroups.has(groupName)}
-                                onClick={() => setExpandedTreeGroups((current) => {
-                                    const next = new Set(current);
-                                    if (next.has(groupName)) next.delete(groupName);
-                                    else next.add(groupName);
-                                    return next;
-                                })}
-                                className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left font-medium text-foreground hover:bg-muted/50"
-                            >
-                                {expandedTreeGroups.has(groupName)
-                                    ? <ChevronDown className="size-4 text-muted-foreground"/>
-                                    : <ChevronRight className="size-4 text-muted-foreground"/>}
-                                <FolderTree className="size-4 text-muted-foreground"/>
-                                <span>{groupName || t("ungrouped_group", {ns: "hosts"})}</span>
-                                <span className="text-xs text-muted-foreground">{groupHosts.length}</span>
-                            </button>
-                            {expandedTreeGroups.has(groupName) && <div className="ml-4 border-l border-border pl-3">
-                                {groupHosts.map((host) => (
-                                    <HostCard
-                                        key={host.id}
-                                        host={host}
-                                        showGroup={false}
-                                        viewMode="tree"
-                                        onConnect={handleConnect}
-                                        onEdit={handleEdit}
-                                        onDelete={handleDeletePrompt}
-                                    />
-                                ))}
-                            </div>}
-                        </section>
-                    ))}
+                    {treeGroups.map(([groupName, groupHosts]) => {
+                        const isExpanded = expandedTreeGroups.has(groupName);
+                        return (
+                            <section key={groupName || "ungrouped"}>
+                                <button
+                                    type="button"
+                                    aria-expanded={isExpanded}
+                                    onClick={() => setExpandedTreeGroups((current) => {
+                                        const next = new Set(current);
+                                        if (next.has(groupName)) next.delete(groupName);
+                                        else next.add(groupName);
+                                        return next;
+                                    })}
+                                    className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left font-medium text-foreground hover:bg-muted/50"
+                                >
+                                    <ChevronRight className={cn(
+                                        "size-4 shrink-0 text-muted-foreground transition-transform duration-200 ease-out motion-reduce:transition-none",
+                                        isExpanded && "rotate-90"
+                                    )}/>
+                                    <FolderTree className="size-4 text-muted-foreground"/>
+                                    <span>{groupName || t("ungrouped_group", {ns: "hosts"})}</span>
+                                    <span className="text-xs text-muted-foreground">{groupHosts.length}</span>
+                                </button>
+                                <div
+                                    className={cn(
+                                        "grid transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none",
+                                        isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                                    )}
+                                >
+                                    <div
+                                        inert={!isExpanded}
+                                        className={cn(
+                                            "overflow-hidden transition-opacity duration-200 ease-out motion-reduce:transition-none",
+                                            isExpanded ? "opacity-100" : "opacity-0"
+                                        )}
+                                    >
+                                        <div className="ml-4 border-l border-border pl-3">
+                                            {groupHosts.map((host) => (
+                                                <HostCard
+                                                    key={host.id}
+                                                    host={host}
+                                                    showGroup={false}
+                                                    viewMode="tree"
+                                                    onConnect={handleConnect}
+                                                    onEdit={handleEdit}
+                                                    onDelete={handleDeletePrompt}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                        );
+                    })}
                 </div>
             )}
 

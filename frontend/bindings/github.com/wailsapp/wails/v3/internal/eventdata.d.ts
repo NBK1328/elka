@@ -8,16 +8,15 @@ import type { Events } from "@wailsio/runtime";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore: Unused imports
 import type * as emitters$0 from "../../../../../elka-desktop/backend/cmd/elka-desktop/emitters/models.js";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore: Unused imports
 
 declare module "@wailsio/runtime" {
     namespace Events {
         interface CustomEvents {
+            "sftp:progress": emitters$0.SFTPProgressPayload;
             "ssh:closed": emitters$0.SSHClosedPayload;
+            "ssh:connected": emitters$0.SSHConnectedPayload;
             "ssh:data": emitters$0.SSHDataPayload;
             "ssh:metrics": emitters$0.SSHMetricsPayload;
-            "sftp:progress": emitters$0.SFTPProgressPayload;
             "updater:progress": emitters$0.UpdaterProgressPayload;
         }
     }

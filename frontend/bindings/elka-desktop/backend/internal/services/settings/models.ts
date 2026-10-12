@@ -65,11 +65,21 @@ export class AppSettings {
      * Creates a new AppSettings instance from a string or object.
      */
     static createFrom($$source: any = {}): AppSettings {
+        const $$createField22_0 = $$createType1;
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        if ("savedPalettes" in $$parsedSource) {
+            $$parsedSource["savedPalettes"] = $$createField22_0($$parsedSource["savedPalettes"]);
+        }
         return new AppSettings($$parsedSource as Partial<AppSettings>);
     }
 }
 
+/**
+ * ColorPalette is a named snapshot of the whole appearance: application chrome, terminal colours,
+ * both fonts and the optional overrides. Storing only the six headline colours meant a saved theme
+ * silently dropped the font, the cursor shape and the sidebar tint, so switching back never restored
+ * the look the theme was saved from.
+ */
 export class ColorPalette {
     "name": string;
     "appBackgroundColor": string;
@@ -124,3 +134,7 @@ export class ColorPalette {
         return new ColorPalette($$parsedSource as Partial<ColorPalette>);
     }
 }
+
+// Private type creation functions
+const $$createType0 = ColorPalette.createFrom;
+const $$createType1 = $Create.Array($$createType0);

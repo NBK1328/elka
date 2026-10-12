@@ -26,6 +26,7 @@ export interface TerminalSession {
     config: SSHConnectionConfig;
     /** Bumped on reconnect: it changes the terminal instance key, which redials the session. */
     reconnectCount: number;
+    remoteAddress?: string;
 }
 
 export interface CreateSessionParams {
@@ -106,6 +107,7 @@ interface SessionState {
     reconnectSession: (id: string) => void;
     closeOtherSessions: (id: string) => void;
     removeSession: (id: string) => void;
+    setSessionRemoteAddress: (id: string, remoteAddress: string) => void;
     setActiveSession: (id: string) => void;
     clearSessions: () => void;
 }
@@ -622,6 +624,12 @@ export const useSessionStore = create<SessionState>((set, get) => ({
                 : session),
         }));
     },
+
+    setSessionRemoteAddress: (id, remoteAddress) => set((state) => ({
+        sessions: state.sessions.map((session) => session.id === id
+            ? {...session, remoteAddress}
+            : session),
+    })),
 
     setActiveSession: (id) => {
         useUIStore.getState().setActiveView(ViewType.Terminal);

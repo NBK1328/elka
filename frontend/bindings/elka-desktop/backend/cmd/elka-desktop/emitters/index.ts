@@ -4,6 +4,7 @@
 export {
     SFTPProgressPayload,
     SSHClosedPayload,
+    SSHConnectedPayload,
     SSHDataPayload,
     SSHMetricsPayload,
     UpdaterProgressPayload

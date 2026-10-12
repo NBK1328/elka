@@ -21,6 +21,7 @@ import (
 )
 
 type SSHEmitter interface {
+	EmitConnected(sessionID, remoteAddress string)
 	EmitData(sessionID string, data []byte)
 	EmitClosed(sessionID string)
 	EmitMetrics(sessionID string, metrics ServerMetrics)
@@ -124,6 +125,11 @@ func (s *SshService) Connect(config *SSHConnectionConfig) error {
 	client, jumpClients, err := connectSSH(config)
 	if err != nil {
 		return apperror.SSHConnectionFailed(fmt.Sprintf("failed to connect to %s", net.JoinHostPort(config.Host, strconv.Itoa(config.Port))), err)
+	}
+	if addr := client.RemoteAddr(); addr != nil {
+		if remoteIP, _, splitErr := net.SplitHostPort(addr.String()); splitErr == nil {
+			s.emitter.EmitConnected(config.ID, remoteIP)
+		}
 	}
 	forwarders := make([]io.Closer, 0, len(config.PortForwards))
 	for _, forwardConfig := range config.PortForwards {

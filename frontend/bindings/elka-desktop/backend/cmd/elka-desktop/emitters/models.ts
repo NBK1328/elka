@@ -5,6 +5,47 @@
 // @ts-ignore: Unused imports
 import { Create as $Create } from "@wailsio/runtime";
 
+export class SFTPProgressPayload {
+    "id": string;
+    "direction": string;
+    "name": string;
+    "path": string;
+    "transferred": number;
+    "total": number;
+
+    /** Creates a new SFTPProgressPayload instance. */
+    constructor($$source: Partial<SFTPProgressPayload> = {}) {
+        if (!("id" in $$source)) {
+            this["id"] = "";
+        }
+        if (!("direction" in $$source)) {
+            this["direction"] = "";
+        }
+        if (!("name" in $$source)) {
+            this["name"] = "";
+        }
+        if (!("path" in $$source)) {
+            this["path"] = "";
+        }
+        if (!("transferred" in $$source)) {
+            this["transferred"] = 0;
+        }
+        if (!("total" in $$source)) {
+            this["total"] = 0;
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new SFTPProgressPayload instance from a string or object.
+     */
+    static createFrom($$source: any = {}): SFTPProgressPayload {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new SFTPProgressPayload($$parsedSource as Partial<SFTPProgressPayload>);
+    }
+}
+
 export class SSHClosedPayload {
     "id": string;
 
@@ -23,6 +64,31 @@ export class SSHClosedPayload {
     static createFrom($$source: any = {}): SSHClosedPayload {
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         return new SSHClosedPayload($$parsedSource as Partial<SSHClosedPayload>);
+    }
+}
+
+export class SSHConnectedPayload {
+    "id": string;
+    "remoteAddress": string;
+
+    /** Creates a new SSHConnectedPayload instance. */
+    constructor($$source: Partial<SSHConnectedPayload> = {}) {
+        if (!("id" in $$source)) {
+            this["id"] = "";
+        }
+        if (!("remoteAddress" in $$source)) {
+            this["remoteAddress"] = "";
+        }
+
+        Object.assign(this, $$source);
+    }
+
+    /**
+     * Creates a new SSHConnectedPayload instance from a string or object.
+     */
+    static createFrom($$source: any = {}): SSHConnectedPayload {
+        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
+        return new SSHConnectedPayload($$parsedSource as Partial<SSHConnectedPayload>);
     }
 }
 
@@ -55,17 +121,26 @@ export class SSHMetricsPayload {
     "id": string;
     "cpu": number;
     "ioWait": number;
-    /** Load average over 1, 5 and 15 minutes, as reported by /proc/loadavg. */
+
+    /**
+     * Load average за минуту, пять и пятнадцать минут, как в top.
+     */
     "load1": number;
     "load5": number;
     "load15": number;
     "memory": number;
     "swap": number;
     "disk": number;
-    /** Bytes per second, summed over every interface but the loopback. */
+
+    /**
+     * Сеть в байтах на секунду.
+     */
     "networkIn": number;
     "networkOut": number;
-    /** Uptime in seconds. */
+
+    /**
+     * Время работы в секундах и счётчики процессов.
+     */
     "uptime": number;
     "processesRunning": number;
     "processesTotal": number;
@@ -153,46 +228,5 @@ export class UpdaterProgressPayload {
     static createFrom($$source: any = {}): UpdaterProgressPayload {
         let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
         return new UpdaterProgressPayload($$parsedSource as Partial<UpdaterProgressPayload>);
-    }
-}
-
-export class SFTPProgressPayload {
-    "id": string;
-    "direction": string;
-    "name": string;
-    "path": string;
-    "transferred": number;
-    "total": number;
-
-    /** Creates a new SFTPProgressPayload instance. */
-    constructor($$source: Partial<SFTPProgressPayload> = {}) {
-        if (!("id" in $$source)) {
-            this["id"] = "";
-        }
-        if (!("direction" in $$source)) {
-            this["direction"] = "";
-        }
-        if (!("name" in $$source)) {
-            this["name"] = "";
-        }
-        if (!("path" in $$source)) {
-            this["path"] = "";
-        }
-        if (!("transferred" in $$source)) {
-            this["transferred"] = 0;
-        }
-        if (!("total" in $$source)) {
-            this["total"] = 0;
-        }
-
-        Object.assign(this, $$source);
-    }
-
-    /**
-     * Creates a new SFTPProgressPayload instance from a string or object.
-     */
-    static createFrom($$source: any = {}): SFTPProgressPayload {
-        let $$parsedSource = typeof $$source === 'string' ? JSON.parse($$source) : $$source;
-        return new SFTPProgressPayload($$parsedSource as Partial<SFTPProgressPayload>);
     }
 }

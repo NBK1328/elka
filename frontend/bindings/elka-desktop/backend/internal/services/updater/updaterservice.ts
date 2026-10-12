@@ -9,16 +9,31 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 // @ts-ignore: Unused imports
 import * as $models from "./models.js";
 
+/**
+ * ApplyAndRestart installs the downloaded update and restarts the application. The installation runs
+ * in the foreground on purpose: a detached installer that fails leaves the user with an application
+ * that simply disappeared, with nothing to show for it.
+ */
 export function ApplyAndRestart(): $CancellablePromise<void> {
     return $Call.ByID(2241486787);
 }
 
+/**
+ * CheckForUpdates reads the latest published release and compares its tag with the running version.
+ * A build without a known version always accepts the release, so a locally built binary sees the same
+ * flow as an installed one.
+ */
 export function CheckForUpdates(): $CancellablePromise<$models.UpdateInfo | null> {
     return $Call.ByID(2379408892).then(($result: any) => {
         return $$createType1($result);
     });
 }
 
+/**
+ * DownloadUpdate fetches the installer found by the last check into the application directory and
+ * reports how much of it has arrived. The file is written next to its target and renamed, so an
+ * interrupted download never leaves a half written installer behind.
+ */
 export function DownloadUpdate(): $CancellablePromise<void> {
     return $Call.ByID(1677281604);
 }

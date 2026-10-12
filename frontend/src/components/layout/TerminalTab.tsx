@@ -9,15 +9,17 @@ import {
 import { useTranslation } from "react-i18next";
 import { ContextMenu as ContextMenuPrimitive } from "radix-ui";
 import { ContextMenuAction, ContextMenuPanel } from "@/components/layout/ContextMenuAction";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const tabStyles = cva(
     "wails-no-drag group my-[var(--tab-margin)] flex h-[var(--tab-height)] min-w-30 max-w-50 cursor-pointer items-center " +
-    "justify-between rounded-md border px-3 text-xs font-medium transition-colors",
+    "justify-between rounded-md border px-3 text-xs font-medium " +
+    "transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out motion-reduce:transition-none",
     {
         variants: {
             state: {
-                active: "border-border bg-card text-foreground",
-                inactive: "border-border border-muted text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                active: "border-border bg-card text-foreground hover:-translate-y-px hover:border-foreground/25 hover:shadow-sm",
+                inactive: "border-border border-muted text-muted-foreground hover:-translate-y-px hover:border-foreground/20 hover:bg-muted/50 hover:text-foreground hover:shadow-sm",
             },
         },
         defaultVariants: {
@@ -65,40 +67,53 @@ interface TerminalTabProps {
 export function TerminalTab({session, isActive, onClick, onClose, onDuplicate, onReconnect, onCloseOthers, canCloseOthers, isInSplit, canAddToSplit, onCreateSplit, onToggleSplit, dropEdge, isDropTarget, groups, onCreateGroup, onMoveToGroup, onOpenSFTP}: TerminalTabProps) {
     const {t} = useTranslation("terminal");
     const state = isActive ? "active" : "inactive";
+    const target = session.remoteAddress
+        ? `${session.remoteAddress}:${session.config.port}`
+        : `${session.config.host}:${session.config.port}`;
 
     return (
         <ContextMenuPrimitive.Root>
-            <ContextMenuPrimitive.Trigger asChild>
-                <div onClick={onClick}
-                     data-top-tab-id={terminalSessionTabID(session.id)}
-                     data-session-id={session.id}
-                     tabIndex={0}
-                     role="tab"
-                     aria-selected={isActive}
-                     onKeyDown={(e) => {
-                         if (e.key === "Enter" || e.key === " ") {
-                             e.preventDefault();
-                             onClick();
-                         }
-                     }}
-                     className={cn("relative", tabStyles({state}), isDropTarget && "ring-2 ring-primary")}>
-                    {dropEdge === "before" && <span className="pointer-events-none absolute -left-1 top-0 z-20 h-full w-0.5 rounded-full bg-primary"/>}
-                    {dropEdge === "after" && <span className="pointer-events-none absolute -right-1 top-0 z-20 h-full w-0.5 rounded-full bg-primary"/>}
-                    <span className="truncate">{session.title}</span>
-                    <button
-                        type="button"
-                        title={t("close_tab")}
-                        aria-label={t("close_named_tab", {name: session.title})}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onClose();
-                        }}
-                        className={cn(closeButtonStyles({state}))}
-                    >
-                        <X className="size-3"/>
-                    </button>
-                </div>
-            </ContextMenuPrimitive.Trigger>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <ContextMenuPrimitive.Trigger asChild>
+                        <div onClick={onClick}
+                             data-top-tab-id={terminalSessionTabID(session.id)}
+                             data-session-id={session.id}
+                             tabIndex={0}
+                             role="tab"
+                             aria-selected={isActive}
+                             onKeyDown={(e) => {
+                                 if (e.key === "Enter" || e.key === " ") {
+                                     e.preventDefault();
+                                     onClick();
+                                 }
+                             }}
+                             className={cn("relative", tabStyles({state}), isDropTarget && "ring-2 ring-primary")}>
+                            {dropEdge === "before" && <span className="pointer-events-none absolute -left-1 top-0 z-20 h-full w-0.5 rounded-full bg-primary"/>}
+                            {dropEdge === "after" && <span className="pointer-events-none absolute -right-1 top-0 z-20 h-full w-0.5 rounded-full bg-primary"/>}
+                            <span className="truncate">{session.title}</span>
+                            <button
+                                type="button"
+                                title={t("close_tab")}
+                                aria-label={t("close_named_tab", {name: session.title})}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onClose();
+                                }}
+                                className={cn(closeButtonStyles({state}))}
+                            >
+                                <X className="size-3"/>
+                            </button>
+                        </div>
+                    </ContextMenuPrimitive.Trigger>
+                </TooltipTrigger>
+                <TooltipContent
+                    side="bottom"
+                    className="pointer-events-none select-none font-mono"
+                >
+                    {target}
+                </TooltipContent>
+            </Tooltip>
             <ContextMenuPrimitive.Portal>
                 <ContextMenuPanel className="z-50 min-w-48 overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none">
                     <ContextMenuAction onSelect={onReconnect} className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground">

@@ -15,6 +15,7 @@ import { TabGroupTab } from "@/components/layout/TabGroupTab";
 import { NameDialog } from "@/components/layout/NameDialog";
 import { SFTPBrowser } from "@/components/terminal/SFTPBrowser";
 import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { isMac } from "@/lib/platform";
 import { useAuthStore } from "@/store/authStore.ts";
@@ -293,6 +294,7 @@ export function TitleBar() {
                 aria-hidden={isMacOS ? "true" : undefined}
             />
 
+            <TooltipProvider delayDuration={300}>
             <div ref={scrollRef}
                   onWheel={handleWheel}
                   onPointerDownCapture={handleTabPointerDown}
@@ -385,6 +387,7 @@ export function TitleBar() {
                     );
                 })}
             </div>
+            </TooltipProvider>
 
             {/* Знак «+» стоит вне прокручиваемой полосы: он остаётся видимым при любом числе вкладок,
                 и его правая граница становится точной левой границей зоны перетаскивания. Сдвиг

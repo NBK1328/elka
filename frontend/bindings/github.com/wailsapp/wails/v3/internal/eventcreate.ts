@@ -12,19 +12,21 @@ import * as emitters$0 from "../../../../../elka-desktop/backend/cmd/elka-deskto
 
 function configure() {
     Object.freeze(Object.assign($Create.Events, {
-        "ssh:closed": $$createType0,
-        "ssh:data": $$createType1,
-        "ssh:metrics": $$createType2,
-        "sftp:progress": $$createType4,
-        "updater:progress": $$createType3,
+        "sftp:progress": $$createType0,
+        "ssh:closed": $$createType1,
+        "ssh:connected": $$createType2,
+        "ssh:data": $$createType3,
+        "ssh:metrics": $$createType4,
+        "updater:progress": $$createType5,
     }));
 }
 
 // Private type creation functions
-const $$createType0 = emitters$0.SSHClosedPayload.createFrom;
-const $$createType1 = emitters$0.SSHDataPayload.createFrom;
-const $$createType2 = emitters$0.SSHMetricsPayload.createFrom;
-const $$createType3 = emitters$0.UpdaterProgressPayload.createFrom;
-const $$createType4 = emitters$0.SFTPProgressPayload.createFrom;
+const $$createType0 = emitters$0.SFTPProgressPayload.createFrom;
+const $$createType1 = emitters$0.SSHClosedPayload.createFrom;
+const $$createType2 = emitters$0.SSHConnectedPayload.createFrom;
+const $$createType3 = emitters$0.SSHDataPayload.createFrom;
+const $$createType4 = emitters$0.SSHMetricsPayload.createFrom;
+const $$createType5 = emitters$0.UpdaterProgressPayload.createFrom;
 
 configure();

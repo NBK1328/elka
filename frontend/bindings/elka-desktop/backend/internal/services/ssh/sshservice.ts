@@ -13,14 +13,11 @@ export function Connect(config: $models.SSHConnectionConfig | null): $Cancellabl
     return $Call.ByID(3818937017, config);
 }
 
-export function StartMetrics(sessionID: string): $CancellablePromise<void> {
-    return $Call.ByID(1524912400, sessionID);
-}
-
-export function StopMetrics(sessionID: string): $CancellablePromise<void> {
-    return $Call.ByID(2960653110, sessionID);
-}
-
+/**
+ * Disconnect tears the session down on request from the UI. It deliberately does not emit the closed
+ * event: that event means the session ended on its own (see cleanupSession) and the UI reacts to it
+ * by dropping the tab, which would close a tab the user asked to reconnect instead.
+ */
 export function Disconnect(sessionID: string): $CancellablePromise<void> {
     return $Call.ByID(1867844523, sessionID);
 }
@@ -44,6 +41,27 @@ export function ListSFTPDirectory(sessionID: string, directory: string): $Cancel
 
 export function Resize(sessionID: string, rows: number, cols: number): $CancellablePromise<void> {
     return $Call.ByID(3504142689, sessionID, rows, cols);
+}
+
+/**
+ * StartMetrics открывает на уже установленном соединении второй канал и начинает раз в секунду
+ * присылать метрики сервера. Повторный вызов для той же сессии ничего не меняет, чтобы переходы
+ * между вкладками не плодили каналы.
+ * 
+ * Фронтенд зовёт метод сразу после открытия вкладки, когда соединение ещё только набирается, поэтому
+ * отсутствие сессии — не ошибка, а повод подождать: без этого ожидания первый запуск молча терялся, и
+ * метрики появлялись только после переключения настройки.
+ */
+export function StartMetrics(sessionID: string): $CancellablePromise<void> {
+    return $Call.ByID(1524912400, sessionID);
+}
+
+/**
+ * StopMetrics закрывает канал сбора. Закрытие обрывает цикл на сервере, иначе та команда continue
+ * будет крутиться там до конца сессии.
+ */
+export function StopMetrics(sessionID: string): $CancellablePromise<void> {
+    return $Call.ByID(2960653110, sessionID);
 }
 
 export function UploadSFTPFile(sessionID: string, remotePath: string, data: string): $CancellablePromise<void> {

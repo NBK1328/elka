@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"testing"
 
@@ -270,6 +271,7 @@ func newTestService(t *testing.T, config *SSHConnectionConfig) *SshService {
 
 type noopSSHEmitter struct{}
 
+func (noopSSHEmitter) EmitConnected(string, string)                                  {}
 func (noopSSHEmitter) EmitData(string, []byte)                                       {}
 func (noopSSHEmitter) EmitClosed(string)                                             {}
 func (noopSSHEmitter) EmitMetrics(string, ServerMetrics)                             {}
@@ -402,5 +404,39 @@ func TestSFTPReportsMissingSession(t *testing.T) {
 	service := NewSshService(&noopSSHEmitter{}, nil)
 	if err := useSFTP(service, "missing"); err == nil {
 		t.Fatal("expected an error for an unknown session")
+	}
+}
+
+type recordingEmitter struct {
+	noopSSHEmitter
+	remoteAddress string
+	emitted       bool
+}
+
+func (e *recordingEmitter) EmitConnected(_, remoteAddress string) {
+	e.remoteAddress = remoteAddress
+	e.emitted = true
+}
+
+func TestConnectReportsTheAddressTheConnectionActuallyReached(t *testing.T) {
+	server := newFakeSSHServer(t, 16)
+	config := server.connectionConfig()
+	config.ID = "session-1"
+	emitter := &recordingEmitter{}
+	service := NewSshService(emitter, nil)
+
+	if err := service.Connect(config); err != nil {
+		t.Fatalf("connect to the test server: %v", err)
+	}
+	t.Cleanup(func() { service.Disconnect(config.ID) })
+
+	if !emitter.emitted {
+		t.Fatal("expected Connect to report the remote address")
+	}
+	if emitter.remoteAddress != "127.0.0.1" {
+		t.Fatalf("expected the resolved address 127.0.0.1, got %q", emitter.remoteAddress)
+	}
+	if strings.Contains(emitter.remoteAddress, ":") {
+		t.Fatalf("expected the address without a port, got %q", emitter.remoteAddress)
 	}
 }

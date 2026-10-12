@@ -17,7 +17,7 @@ import { dismissSplash } from "@/lib/splash";
 
 export default function App() {
     const {isUnlocked} = useAuthStore();
-    const {removeSession} = useSessionStore();
+    const {removeSession, setSessionRemoteAddress} = useSessionStore();
     const {setShowHostGroups, setShowSidebarToggle, setServerMetrics, setHostViewMode, setGroupViewMode, setAppearance} = useUIStore();
     const appearance = useUIStore((state) => state.appearance);
     const {i18n} = useTranslation();
@@ -79,6 +79,14 @@ export default function App() {
 
         return () => unsubscribe();
     }, [removeSession]);
+
+    useEffect(() => {
+        const unsubscribe = Events.On(AppEvent.SshConnected, (event) => {
+            setSessionRemoteAddress(event.data.id, event.data.remoteAddress);
+        });
+
+        return () => unsubscribe();
+    }, [setSessionRemoteAddress]);
 
 
     return (
