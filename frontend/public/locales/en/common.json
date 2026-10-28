@@ -9,6 +9,8 @@
   "search_placeholder": "Search...",
   "username": "Username",
   "password": "Password",
+  "show_password": "Show password",
+  "hide_password": "Hide password",
   "port": "Port",
   "host_ip": "Host / IP",
   "label_optional": "Label (Optional)",

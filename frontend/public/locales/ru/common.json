@@ -9,6 +9,8 @@
   "search_placeholder": "Поиск...",
   "username": "Имя пользователя",
   "password": "Пароль",
+  "show_password": "Показать пароль",
+  "hide_password": "Скрыть пароль",
   "port": "Порт",
   "host_ip": "Хост / IP",
   "label_optional": "Название (необязательно)",

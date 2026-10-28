@@ -5,6 +5,7 @@ import {Host, ItemType, JumpHopMode, JumpHostHop, PortForward, PortForwardMode, 
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
+import {PasswordInput} from "@/components/ui/password-input";
 import {Switch} from "@/components/ui/switch";
 import {Label} from "@/components/ui/label";
 import {
@@ -302,9 +303,8 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
 
                     <div className="order-5 grid gap-2">
                         <Label htmlFor="password">{t("password_label", {ns: "hosts"})}</Label>
-                        <Input
+                        <PasswordInput
                             id="password"
-                            type="password"
                             value={formData.password || ""}
                             onChange={(e) =>
                                 setFormData({...formData, password: e.target.value})}
@@ -524,9 +524,8 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
 
                     <div className="order-7 grid gap-2">
                         <Label htmlFor="passphrase">{t("passphrase_label", {ns: "credentials"})}</Label>
-                        <Input
+                        <PasswordInput
                             id="passphrase"
-                            type="password"
                             value={formData.passphrase || ""}
                             onChange={(e) => setFormData({...formData, passphrase: e.target.value})}
                         />
