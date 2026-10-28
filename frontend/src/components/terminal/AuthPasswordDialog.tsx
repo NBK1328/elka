@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 
 interface AuthPasswordDialogProps {
     open: boolean;
@@ -51,11 +51,10 @@ export function AuthPasswordDialog({open, username, target, isConnecting, onCanc
                     </p>
                     <div className="grid gap-1.5">
                         <Label htmlFor="auth-password">{t("password", {ns: "common"})}</Label>
-                        <Input
+                        <PasswordInput
                             id="auth-password"
                             autoFocus
                             required
-                            type="password"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
                         />

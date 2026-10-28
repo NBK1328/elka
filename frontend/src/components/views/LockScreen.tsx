@@ -4,6 +4,7 @@ import { FolderOpen, Lock, Shield, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { AuthService } from "../../../bindings/elka-desktop/backend/internal/services/auth";
 import { useAuthStore } from "@/store/authStore";
 import { handleAppError } from "@/lib/error";
@@ -121,9 +122,8 @@ export function LockScreen() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="password-login">{t("master_password")}</Label>
-                            <Input
+                            <PasswordInput
                                 id="password-login"
-                                type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
@@ -191,8 +191,7 @@ export function LockScreen() {
                         </div>
                         <div className="space-y-2">
                             <Label>{t("master_password")}</Label>
-                            <Input
-                                type="password"
+                            <PasswordInput
                                 value={password}
                                 onChange={(e) =>
                                     setPassword(e.target.value)}

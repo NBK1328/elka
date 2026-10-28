@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Textarea } from "@/components/ui/textarea";
 
 interface CredentialModalProps {
@@ -85,9 +86,8 @@ export function CredentialModal({isOpen, onClose, onSave, initialData, isSaving}
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="credential-password">{t("password_kind")}</Label>
-                        <Input
+                        <PasswordInput
                             id="credential-password"
-                            type="password"
                             autoComplete="new-password"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
@@ -95,9 +95,8 @@ export function CredentialModal({isOpen, onClose, onSave, initialData, isSaving}
                     </div>
                     <div className="grid gap-2">
                         <Label htmlFor="credential-passphrase">{t("passphrase_kind")}</Label>
-                        <Input
+                        <PasswordInput
                             id="credential-passphrase"
-                            type="password"
                             autoComplete="new-password"
                             value={passphrase}
                             onChange={(event) => setPassphrase(event.target.value)}
