@@ -1,97 +1,141 @@
-<h1 align="center">Elka</h1>
+<div align="center">
+  <img src="assets/readme-banner.png" alt="Elka" width="100%">
+  <h1>Elka</h1>
+  <p><strong>An encrypted SSH client that keeps everything on your machine.</strong></p>
+
+  <p>
+    <a href="README.md">English</a> ·
+    <a href="README.ru.md">Русский</a>
+  </p>
+
+  <p>
+    <a href="../../releases"><img alt="Releases" src="https://img.shields.io/badge/releases-GitHub-00648e?style=flat-square"></a>
+    <img alt="macOS" src="https://img.shields.io/badge/macOS-Apple%20Silicon-08192F?style=flat-square&logo=apple&logoColor=white">
+    <img alt="Windows" src="https://img.shields.io/badge/Windows-installer-08192F?style=flat-square&logo=windows&logoColor=4FC3F7">
+    <img alt="Linux" src="https://img.shields.io/badge/Linux-AppImage-08192F?style=flat-square&logo=linux&logoColor=F4F7FA">
+    <img alt="Go 1.25" src="https://img.shields.io/badge/Go-1.25-08192F?style=flat-square&logo=go&logoColor=00ADD8">
+    <img alt="React 19" src="https://img.shields.io/badge/React-19-08192F?style=flat-square&logo=react&logoColor=61DAFB">
+    <img alt="Wails v3" src="https://img.shields.io/badge/Wails-v3-1fb366?style=flat-square">
+    <img alt="AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-92A0A7?style=flat-square">
+  </p>
+</div>
+
+> **Local vault. Native UI. No Electron.**
+>
+> Hosts, keys, credentials and groups live in an encrypted SQLite vault on your disk. Elka opens terminals, chains jump hosts, forwards ports and browses SFTP — all in one native window.
 
 <p align="center">
-  <strong>SSH-клиент с шифрованным хранилищем</strong><br/>
-  Нативный интерфейс без Electron · Go + React · Wails v3
+  <img src="images/SplitScreen-ing.png" alt="Split screen" width="48%" align="middle"/>
+  &nbsp;
+  <img src="images/NewSession-ing.png" alt="New session" width="48%" align="middle"/>
 </p>
+
+## Highlights
+
+| Encrypted vault | Terminals that fit | Files and forwarding |
+| --- | --- | --- |
+| Hosts, keys and credentials in SQLite, sealed with AES-256-GCM and an Argon2id-derived key. | Up to eight resizable panes, tab groups, drag-and-drop layout and per-server metrics. | Built-in SFTP browser plus local and remote port forwarding from the terminal tab. |
+
+| Make it yours | Import and update | Built to stay out of the way |
+| --- | --- | --- |
+| Dark and light palettes, blue and green accents, custom accent colour, 25 UI fonts, terminal font and cursor. | Tabby host import/export and in-app updates checked against GitHub releases. | Go and React with a native Wails window. No browser runtime bundled into the app. |
+
+## What it does
+
+- **Encrypted storage.** Hosts, groups, keys and credentials are stored in SQLite and encrypted with AES-256-GCM; the key is derived from your password with Argon2id.
+- **Connections.** Plain SSH, jump-host chains, and local or remote port forwarding.
+- **Terminal.** xterm.js, up to eight panes with adjustable sizes, tab groups, and layouts restored when you switch sections.
+- **Files.** An SFTP browser built into the terminal tab.
+- **Import and export.** Tabby format, including profile metadata.
+- **Appearance.** Dark and light palettes, blue and green accents, a custom accent colour, separate interface and terminal fonts, and a terminal cursor style.
+- **Two languages.** English and Russian.
+- **Updates.** Releases built and published from a tag, and new-version checks against GitHub tags in Settings.
+- **Server metrics.** For the active tab in the sidebar: CPU load, load average, disk wait and memory, refreshed once a second.
+- **Portable vault.** The folder that holds the database can be moved anywhere on disk.
 
 <p align="center">
-  <a href="https://github.com/anomalyco/opencode"><img src="https://img.shields.io/badge/stack-Go%20%2B%20React-blue" alt="stack"/></a>
-  <a href="#"><img src="https://img.shields.io/badge/license-MIT-green" alt="license"/></a>
+  <img src="images/Demo-Elka.gif" alt="Elka demo" width="100%"/>
 </p>
 
-Elka — SSH-клиент, в котором всё хранится в зашифрованном хранилище прямо на вашей машине. Написан на Go и React, интерфейс нативный — без Electron.
+## Where it comes from
 
-<p align="center"><img src="images/SplitScreen-ing.png" alt="Split screen" width="48%" align="middle"/>&nbsp;<img src="images/NewSession-ing.png" alt="New session" width="48%" align="middle"/></p>
+Elka grew out of [Terminator](https://github.com/terminator-ssh/terminator-desktop), an open-source SSH client that was itself inspired by Termius. Its architecture is the starting point: Wails v3, a Go backend, encrypted SQLite and Velopack for installers.
 
-## Что умеет приложение
+What Elka adds:
 
-- **Шифрованное хранилище.** Хосты, ключи, учётные данные и группы лежат в SQLite, всё защищено AES-256-GCM, ключ выводится из пароля через Argon2id.
-- **Подключения.** Обычный SSH, цепочки jump-хостов, локальная и удалённая переадресация портов.
-- **Терминал.** xterm.js, до восьми панелей на экране с регулируемыми размерами, группы вкладок, восстановление раскладки при переключении разделов.
-- **Файлы.** Встроенный SFTP-браузер прямо из вкладки терминала.
-- **Импорт и экспорт.** Формат Tabby, включая перенос метаданных профилей.
-- **Внешний вид.** Тёмная и светлая палитры, синяя и зелёная, свой акцент, выбор шрифта для интерфейса и отдельные шрифт, размер и курсор терминала.
-- **Два языка.** Русский и английский.
-- **Обновления.** Сборка и публикация релизов по тегу, проверка новых версий по тегам GitHub прямо в настройках.
-- **Показатели сервера.** Для активной вкладки в боковом меню: нагрузка, load average, ожидание диска и память, обновление раз в секунду.
-- **Своё хранилище.** Папку с базой можно перенести в любое место диска.
+- splitting the terminal into panes and draggable tab groups;
+- Tabby host import and export;
+- appearance settings: palettes, accent colour, twenty-five fonts, terminal font and cursor;
+- its own SFTP browser and port forwarding;
+- its own name, icon and update system.
 
-<p align="center">
-  <img src="images/Demo-Elka.gif" alt="Demo" width="100%"/>
-</p>
+## Install
 
-## Откуда
+1. Open the [Releases](../../releases) page.
+2. Download the installer for your platform:
+   - **macOS** — `.pkg` (Apple Silicon);
+   - **Windows** — `.exe` setup or portable `.zip`;
+   - **Linux** — `.AppImage`.
+3. Install and launch the app.
 
-Проект вырос из [Terminator](https://github.com/terminator-ssh/terminator-desktop) — открытого SSH-клиента, который сам вдохновлён Termius. За основу взята его архитектура: Wails v3, Go в бэкенде, SQLite с шифрованием, Velopack для сборки установочных пакетов.
+The macOS build is ad-hoc signed. If macOS blocks the first launch, right-click the app and choose **Open**.
 
-Важные для меня функции терминала которые добавил:
+## Build
 
-- разделение терминала на панели и группы вкладок с перетаскиванием;
-- импорт и экспорт хостов в формате Tabby;
-- настройки внешнего вида: палитры, акцентный цвет, двадцать шрифтов, шрифт и курсор терминала;
-- собственный SFTP-браузер и переадресация портов;
-- своё имя, своя иконка и своя система обновлений.
-
-## Где лежат данные
-
-Настройки и база хранятся в `~/Library/Application Support/Elka` на macOS, в `%AppData%\Elka` на Windows и в `~/.config/Elka` на Linux.
-
-## Сборка
-
-Нужны Go 1.25+, Node.js 24+, pnpm и [Wails v3 CLI](https://v3.wails.io/getting-started/installation/).
+Requirements: Go 1.25+, Node.js 24+, pnpm, and the [Wails v3 CLI](https://v3.wails.io/getting-started/installation/).
 
 ```sh
-wails3 dev              # разработка
-wails3 task package     # сборка приложения под текущую платформу
+wails3 dev              # development
+wails3 task package     # production build for the current platform
 ```
 
-macOS можно собрать в Docker, не ставя зависимости локально:
+macOS can be built in Docker without installing dependencies locally:
 
 ```sh
 ./build-macos-in-docker.sh --arch arm64 --format dmg
 ```
 
-Для Intel вместо `arm64` укажите `amd64`. Без флага соберётся только `.app`.
+Use `amd64` for Intel. Without the `--format` flag only the `.app` is produced.
 
-Отладка с delve:
+Debug with delve:
 
 ```sh
 dlv debug --headless --listen=:2345 ./backend/cmd/elka-desktop -- dev
 ```
 
-## Память
+## Architecture
 
-Интерфейс живёт в отдельном процессе `com.apple.WebKit.WebContent`, и его размер удобнее мерить
-скриптом, чем вручную:
+- **Wails v3** shell with a native webview window
+- **Go** backend for SSH, SFTP, storage, settings and updates
+- **React 19 + TypeScript + Vite** front end
+- **xterm.js** terminals
+- **SQLite** with AES-256-GCM encryption and Argon2id key derivation
+- **Velopack (`vpk`)** installers; GitHub Actions builds and publishes releases from a tag
+
+## Where the data lives
+
+Settings and the database live in `~/Library/Application Support/Elka` on macOS, `%AppData%\Elka` on Windows, and `~/.config/Elka` on Linux.
+
+## Project map
+
+A module-by-module guide to where the interface, connections and storage are implemented: [PROJECT_MAP_RU.md](PROJECT_MAP_RU.md).
+
+## Development checks
 
 ```sh
-./build/measure-memory.sh 30
+go test ./backend/internal/services/... ./backend/cmd/elka-desktop/...
+go vet ./backend/internal/services/...
+cd frontend && pnpm run build
 ```
 
-Скрипт печатает `rss` и `Physical footprint` каждые две секунды. Он существует потому, что
-`pgrep -f WebContent` находит ещё и процессы других WebKit-приложений, включая оставшиеся от
-предыдущего запуска: такой процесс часто в разы больше и легко приписать Элке. Собственный процесс
-находится по времени старта, а доверять стоит последнему замеру — первые идут, пока грузится бандл.
+## License
 
-## Где что лежит
+AGPL-3.0. See [LICENSE](LICENSE).
 
-Карта модулей с подсказками, что править при изменении интерфейса, подключений или хранилища: [PROJECT_MAP_RU.md](PROJECT_MAP_RU.md).
+## Thanks
 
-## Благодарности
-
-Авторам - https://github.com/terminator-ssh/terminator-desktop
+The authors of [Terminator](https://github.com/terminator-ssh/terminator-desktop).
 
 <p align="center">
-  <img src="build/appicon.png" width="220" alt="Elka"/>
+  <img src="build/appicon.png" width="180" alt="Elka"/>
 </p>
