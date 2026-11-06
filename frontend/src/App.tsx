@@ -17,10 +17,12 @@ import { ensureAppFontReady, DEFAULT_APP_FONT_FAMILY } from "@/lib/fontLoader";
 import { preloadTerminalFace } from "@/lib/terminalFont";
 import { dismissSplash } from "@/lib/splash";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
+import { useWindowResizeCursor } from "@/hooks/useWindowResizeCursor";
 
 export default function App() {
     const {isUnlocked} = useAuthStore();
     useSessionPersistence();
+    useWindowResizeCursor();
     const {markSessionClosed} = useSessionStore();
     const {setShowHostGroups, setShowSidebarToggle, setServerMetrics, setHostViewMode, setGroupViewMode, setAppearance} = useUIStore();
     const appearance = useUIStore((state) => state.appearance);

@@ -103,6 +103,9 @@ type activeSession struct {
 	sftp      *sftp.Client
 	sftpConn  *ssh.Client
 	sftpJumps []*ssh.Client
+	// keepAliveStop останавливает фоновые пинги, которые не дают серверу, NAT и межсетевому
+	// экрану закрыть простаивающее соединение.
+	keepAliveStop func()
 }
 
 type SshService struct {
@@ -114,6 +117,12 @@ type SshService struct {
 
 // TODO: configurable timeout?
 const timeout = 15 * time.Second
+
+// keepAliveInterval держит сессию живой, пока приложение открыто. Без пингов сервер с
+// ClientAliveInterval, NAT или межсетевой экран закрывают простаивающее соединение, и вкладка
+// пропадает раньше, чем пользователь успевает к ней вернуться. Тридцать секунд — типичный
+// интервал OpenSSH и заведомо меньше любого часового простоя.
+const keepAliveInterval = 30 * time.Second
 
 const batchRatePerSecond = 60
 
@@ -216,13 +225,14 @@ func (s *SshService) Connect(config *SSHConnectionConfig) error {
 	// eventual exit was reported as if it were the session the user is looking at.
 	previous := s.sessions[config.ID]
 	currentSession := &activeSession{
-		client:      client,
-		jumpClients: jumpClients,
-		session:     session,
-		stdin:       stdin,
-		forwarders:  forwarders,
-		attempt:     config.Attempt,
-		config:      config,
+		client:        client,
+		jumpClients:   jumpClients,
+		session:       session,
+		stdin:         stdin,
+		forwarders:    forwarders,
+		attempt:       config.Attempt,
+		config:        config,
+		keepAliveStop: startKeepAlive(client),
 	}
 	s.sessions[config.ID] = currentSession
 	s.mu.Unlock()
@@ -967,10 +977,46 @@ func (s *SshService) Disconnect(sessionID string, attempt string) {
 	}
 }
 
-// closeActiveSession закрывает соединение целиком. Сессия, которой уже нет, закрывать нечего.
+// startKeepAlive шлёт серверу пустые глобальные запросы, пока соединение живо. Ответ не
+// запрашивается намеренно: не все серверы отвечают на keepalive@openssh.com, а ждать ответа
+// значило бы рвать исправное соединение. Пакет сам по себе продлевает и SSH-сессию, и запись в
+// NAT, поэтому вкладка переживает многочасовой простой.
+func startKeepAlive(client *ssh.Client) func() {
+	done := make(chan struct{})
+	var once sync.Once
+
+	go func() {
+		ticker := time.NewTicker(keepAliveInterval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-done:
+				return
+			case <-ticker.C:
+				if _, _, err := client.SendRequest("keepalive@openssh.com", false, nil); err != nil {
+					// Запись не прошла — соединения больше нет. Закрываем его, чтобы читатель
+					// вывода узнал об этом и пометил вкладку, а не висел в ожидании.
+					_ = client.Close()
+					return
+				}
+			}
+		}
+	}()
+
+	return func() {
+		once.Do(func() { close(done) })
+	}
+}
+
+// closeActiveSession закрывает соединение целиком. Сессии, которой уже нет, закрывать нечего.
 func closeActiveSession(active *activeSession) {
 	if active == nil {
 		return
+	}
+	if active.keepAliveStop != nil {
+		active.keepAliveStop()
+		active.keepAliveStop = nil
 	}
 	if active.session != nil {
 		_ = active.session.Close()

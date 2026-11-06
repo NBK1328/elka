@@ -194,6 +194,29 @@
     --wails-resize: all;
 }
 
+/* macOS: полоса у края окна ведёт себя как нативная ручка изменения размера. Курсор задаётся
+   через атрибут на html и с !important, иначе терминал, поля ввода и кнопки перекрывают его
+   своим cursor. */
+[data-window-resize="ew"],
+[data-window-resize="ew"] * {
+    cursor: ew-resize !important;
+}
+
+[data-window-resize="ns"],
+[data-window-resize="ns"] * {
+    cursor: ns-resize !important;
+}
+
+[data-window-resize="nwse"],
+[data-window-resize="nwse"] * {
+    cursor: nwse-resize !important;
+}
+
+[data-window-resize="nesw"],
+[data-window-resize="nesw"] * {
+    cursor: nesw-resize !important;
+}
+
 html,
 body,
 #root,
