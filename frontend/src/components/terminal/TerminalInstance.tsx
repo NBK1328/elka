@@ -550,6 +550,17 @@ export function TerminalInstance({
                 for (const chunk of buffered) writeToTerminal(term, chunk);
             }
 
+            // In the alternate screen xterm turns the wheel into Up/Down keys, which scrolls the
+            // shell history instead of the output. Forward the wheel only to apps that asked for
+            // mouse reports; the normal buffer keeps its own scrollback.
+            term.attachCustomWheelEventHandler((event) => {
+                if (term.buffer.active.type !== "alternate") return true;
+                const mouseMode = term.modes.mouseTrackingMode;
+                if (mouseMode === "vt200" || mouseMode === "drag" || mouseMode === "any") return true;
+                event.preventDefault();
+                return false;
+            });
+
             term.attachCustomKeyEventHandler((arg) => {
                 if (arg.type === "keydown") {
                     if (arg.ctrlKey && arg.shiftKey && arg.code === "KeyC") {
