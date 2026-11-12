@@ -210,7 +210,12 @@ export function TerminalInstance({
     const [connectionState, setConnectionState] = useState<ConnectionState>("connecting");
     // Set when the server turned the stored credentials away and the password can be typed in. The
     // error is kept with it: dismissing the prompt has to say in the terminal why the session is dead.
-    const [authPrompt, setAuthPrompt] = useState<{username: string; target: string; error: unknown} | null>(null);
+    const [authPrompt, setAuthPrompt] = useState<{
+        username: string;
+        target: string;
+        error: unknown;
+        config: SSHConnectionConfig;
+    } | null>(null);
     const [isRetryingAuth, setIsRetryingAuth] = useState(false);
     // A password typed at the prompt, kept by the session so a reconnect starts from what the server
     // accepted rather than from the credentials it already turned down.
@@ -346,6 +351,60 @@ export function TerminalInstance({
         terminalRef.current.write(`\r\n\x1b[31m${translated}\x1b[0m\r\n`)
     };
 
+    const connectionPeer = (host: string, port: number, username?: string) =>
+        username ? `${username}@${host}:${port}` : `${host}:${port}`;
+
+    const connectionRoute = (failedConfig: SSHConnectionConfig) => {
+        const hops = failedConfig.jumpHosts?.length
+            ? failedConfig.jumpHosts
+            : failedConfig.jumpHost ? [failedConfig.jumpHost] : [];
+        return [
+            t("connection_route_local"),
+            ...hops.map((hop) => connectionPeer(hop.host, hop.port, hop.username)),
+            connectionPeer(failedConfig.host, failedConfig.port, failedConfig.username),
+        ].join(" → ");
+    };
+
+    const connectionAuthentication = (failedConfig: SSHConnectionConfig) => {
+        const methods: string[] = [];
+        if (failedConfig.password) methods.push(t("connection_auth_password"));
+        if (failedConfig.privateKey) {
+            methods.push(failedConfig.privateKeyPassphrase
+                ? t("connection_auth_key_passphrase")
+                : t("connection_auth_key"));
+        }
+        return methods.length > 0 ? methods.join(" + ") : t("connection_auth_none");
+    };
+
+    const connectionForwards = (forwards: SSHConnectionConfig["portForwards"]) =>
+        (forwards || []).map((forward) => {
+            const mode = forward.mode === "remote"
+                ? t("connection_forward_remote")
+                : t("connection_forward_local");
+            return `${mode} ${forward.listenAddress || "127.0.0.1"}:${forward.listenPort}` +
+                ` → ${forward.targetAddress}:${forward.targetPort}`;
+        }).join(", ");
+
+    const printConnectionErrorToTerminal = (error: unknown, failedConfig: SSHConnectionConfig) => {
+        if (!terminalRef.current) return;
+        const appError = parseAppError(error);
+        const forwards = connectionForwards(failedConfig.portForwards);
+        const details = [
+            t("connection_failed_target", {
+                target: connectionPeer(failedConfig.host, failedConfig.port, failedConfig.username),
+            }),
+            t("connection_failed_route", { route: connectionRoute(failedConfig) }),
+            t("connection_failed_auth", { authentication: connectionAuthentication(failedConfig) }),
+            ...(forwards ? [t("connection_failed_forwards", { forwards })] : []),
+            t("connection_failed_reason", {
+                reason: appError.detailsString || appError.message || String(error),
+            }),
+        ];
+        terminalRef.current.write(
+            `\r\n\x1b[31m${t("connection_failed_title")}\x1b[0m\r\n${details.join("\r\n")}\r\n`,
+        );
+    };
+
     /**
      * Opens the session, and decides what a refusal of the login means.
      *
@@ -384,13 +443,14 @@ export function TerminalInstance({
                         username: nextConfig.username,
                         target: `${nextConfig.host}:${nextConfig.port}`,
                         error,
+                        config: dialing,
                     });
                     return;
                 }
                 // Anything else explains itself in the terminal, and leaving the prompt over it would
                 // only hide the explanation behind a field for a password that is not the problem.
                 setAuthPrompt(null);
-                printErrorToTerminal(error);
+                printConnectionErrorToTerminal(error, dialing);
             });
     };
 
@@ -406,7 +466,7 @@ export function TerminalInstance({
     const dismissAuthPrompt = () => {
         const refused = authPrompt;
         setAuthPrompt(null);
-        if (refused) printErrorToTerminal(refused.error);
+        if (refused) printConnectionErrorToTerminal(refused.error, refused.config);
     };
 
     const handleDragOver = (event: ReactDragEvent<HTMLDivElement>) => {

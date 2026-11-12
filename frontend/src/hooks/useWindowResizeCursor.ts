@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { System } from "@wailsio/runtime";
+import { isMac } from "@/lib/platform";
 
 /** Ширина полосы у края окна, где курсор показывает, что окно можно растянуть. */
 const EDGE = 6;
@@ -41,7 +41,9 @@ function cursorAt(x: number, y: number): ResizeCursor | null {
  */
 export function useWindowResizeCursor() {
     useEffect(() => {
-        if (!System.IsMac()) return;
+        // Not System.IsMac(): Wails injects window._wails.environment only after the webview
+        // finishes navigating, which can happen after this effect has already run.
+        if (!isMac()) return;
 
         let current: ResizeCursor | null = null;
 
