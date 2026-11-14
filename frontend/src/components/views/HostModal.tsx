@@ -335,7 +335,7 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
                         />
                     </div>
 
-                    <div className="order-6 grid gap-2">
+                    <div className="order-7 grid gap-2">
                         <Label>{t("ssh_key_label", {ns: "hosts"})}</Label>
                         <Select
                             value={formData.keyId || "none"}
@@ -524,7 +524,7 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
                         <p className="text-xs text-muted-foreground">{t("forward_help", {ns: "hosts"})}</p>
                     </div>
 
-                    <div className="order-8 grid gap-2">
+                    <div className="order-6 grid gap-2">
                         <Label>{t("saved_credential_label", {ns: "credentials"})}</Label>
                         <Select
                             value={formData.credentialId || "none"}
@@ -546,7 +546,7 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
                         </Select>
                     </div>
 
-                    <div className="order-7 grid gap-2">
+                    <div className="order-8 grid gap-2">
                         <Label htmlFor="passphrase">{t("passphrase_label", {ns: "credentials"})}</Label>
                         <PasswordInput
                             id="passphrase"
@@ -556,7 +556,7 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
                     </div>
 
                     <label htmlFor="use-password-as-passphrase"
-                           className="order-7 flex cursor-pointer items-center justify-between gap-3 text-sm">
+                           className="order-8 flex cursor-pointer items-center justify-between gap-3 text-sm">
                         {t("use_password_as_passphrase", {ns: "credentials"})}
                         <Switch
                             id="use-password-as-passphrase"
