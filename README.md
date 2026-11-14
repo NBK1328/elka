@@ -44,6 +44,7 @@
 
 - **Encrypted storage.** Hosts, groups, keys and credentials are stored in SQLite and encrypted with AES-256-GCM; the key is derived from your password with Argon2id.
 - **Connections.** Plain SSH, jump-host chains, and local or remote port forwarding.
+- **Quick connect.** Open a terminal to any address without saving a host, optionally through a saved jump host.
 - **Terminal.** xterm.js, up to eight panes with adjustable sizes, tab groups, and layouts restored when you switch sections.
 - **Files.** An SFTP browser built into the terminal tab.
 - **Import and export.** Tabby format, including profile metadata.
