@@ -127,7 +127,7 @@ export function TabGroupTab({
                                     <ChevronDown className="size-3"/>
                                 </button>
                             </PopoverTrigger>
-                            <PopoverContent align="end" className="w-52 p-1">
+                            <PopoverContent align="end" side="bottom" avoidCollisions={false} className="max-h-(--radix-popover-content-available-height) w-52 overflow-y-auto p-1">
                                 <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">{group.title}</div>
                                 {memberSessions.map((session) => (
                                     <button

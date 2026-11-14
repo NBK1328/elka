@@ -107,6 +107,8 @@ function SearchableSelect({
       <PopoverContent
         data-slot="searchable-select-content"
         align="start"
+        side="bottom"
+        avoidCollisions={false}
         className="w-(--radix-popover-trigger-width) min-w-56 gap-1.5 p-1.5"
         onOpenAutoFocus={(event) => {
           event.preventDefault()
