@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronDown, ChevronRight, FolderPlus, FolderTree, Plus, Search, X } from "lucide-react";
+import { ChevronDown, ChevronRight, FolderTree, Plus, Search, X, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CARD_HEIGHT, HostCard, LIST_ROW_HEIGHT } from "@/components/views/HostCard";
@@ -10,11 +10,11 @@ import { DeleteHostDialog } from "@/components/views/DeleteHostDialog";
 import { useHosts, useSaveHost, useDeleteHost } from "@/hooks/useHosts";
 import { useKeys } from "@/hooks/useKeys";
 import { useCredentials } from "@/hooks/useCredentials";
-import { useGroups, useSaveGroup } from "@/hooks/useGroups";
-import { useSessionStore } from "@/store/sessionStore";
+import { useGroups } from "@/hooks/useGroups";
+import { useSessionStore, type CreateSessionParams } from "@/store/sessionStore";
 import { toast } from "sonner";
-import { Host, HostGroup } from "../../../bindings/elka-desktop/backend/internal/services/blob";
-import { GroupModal } from "@/components/views/GroupModal";
+import { Host } from "../../../bindings/elka-desktop/backend/internal/services/blob";
+import { QuickConnectModal } from "@/components/views/QuickConnectModal";
 import { jumpHostDependents, resolveHostAuthentication, resolveJumpHosts, resolvePortForwards } from "@/lib/sshConnection";
 import { HostViewPicker } from "@/components/layout/HostViewPicker";
 import { HostViewMode, useUIStore } from "@/store/uiStore";
@@ -51,15 +51,13 @@ export function HostsPage() {
 
     const saveMutation = useSaveHost();
     const deleteMutation = useDeleteHost();
-    const saveGroupMutation = useSaveGroup();
     const {addSession} = useSessionStore();
     const {selectedHostGroup, setSelectedHostGroup, showHostGroups, hostViewMode, setHostViewMode} = useUIStore();
     const displayedViewMode = hostViewMode === "tree" && !showHostGroups ? "list" : hostViewMode;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+    const [isQuickConnectOpen, setIsQuickConnectOpen] = useState(false);
     const [editingHost, setEditingHost] = useState<Host | null>(null);
-    const [editingGroup, setEditingGroup] = useState<HostGroup | null>(null);
     const [hostToDelete, setHostToDelete] = useState<Host | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [expandedTreeGroups, setExpandedTreeGroups] = useState<Set<string>>(new Set());
@@ -117,10 +115,6 @@ export function HostsPage() {
         saveMutation.mutate(host, {onSuccess: () => setIsModalOpen(false)});
     };
 
-    const handleSaveGroup = (group: HostGroup) => {
-        saveGroupMutation.mutate(group, {onSuccess: () => setIsGroupModalOpen(false)});
-    };
-
     const handleConnect = useCallback((host: Host) => {
         try {
             const auth = resolveHostAuthentication(host, keys || [], credentials || [], groups || []);
@@ -137,6 +131,10 @@ export function HostsPage() {
             handleAppError(error);
         }
     }, [keys, credentials, groups, hosts, addSession]);
+
+    const handleQuickConnect = useCallback((params: CreateSessionParams) => {
+        addSession(params);
+    }, [addSession]);
 
     const filteredHosts = useMemo(() => {
         const query = searchQuery.trim().toLocaleLowerCase();
@@ -203,19 +201,14 @@ export function HostsPage() {
                     <Plus/>
                     {t("new_host")}
                 </Button>
-                {showHostGroups && (
-                    <Button
-                        variant="outline"
-                        className="shrink-0"
-                        onClick={() => {
-                            setEditingGroup(null);
-                            setIsGroupModalOpen(true);
-                        }}
-                    >
-                        <FolderPlus/>
-                        {t("new_group", {ns: "hosts"})}
-                    </Button>
-                )}
+                <Button
+                    variant="outline"
+                    className="shrink-0"
+                    onClick={() => setIsQuickConnectOpen(true)}
+                >
+                    <Zap/>
+                    {t("quick_connect", {ns: "hosts"})}
+                </Button>
             </div>
 
             {showHostGroups && selectedHostGroup && (
@@ -384,12 +377,10 @@ export function HostsPage() {
                 isSaving={saveMutation.isPending}
             />
 
-            <GroupModal
-                isOpen={isGroupModalOpen}
-                onClose={() => setIsGroupModalOpen(false)}
-                onSave={handleSaveGroup}
-                initialData={editingGroup}
-                isSaving={saveGroupMutation.isPending}
+            <QuickConnectModal
+                isOpen={isQuickConnectOpen}
+                onClose={() => setIsQuickConnectOpen(false)}
+                onConnect={handleQuickConnect}
             />
 
             <DeleteHostDialog
