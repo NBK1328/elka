@@ -19,6 +19,7 @@
   "no_groups_found": "No groups found.",
   "no_group": "No group",
   "new_group": "New Group",
+  "create_group_named": "Create group \"{{name}}\"",
   "filtered_group": "Showing group: {{name}}",
   "clear_group_filter": "Clear group filter",
   "new_tab": "Open host list in a new tab",

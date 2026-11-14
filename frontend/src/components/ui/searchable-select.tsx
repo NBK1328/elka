@@ -1,5 +1,5 @@
 import * as React from "react"
-import { CheckIcon, ChevronDownIcon, SearchIcon } from "lucide-react"
+import { CheckIcon, ChevronDownIcon, PlusIcon, SearchIcon } from "lucide-react"
 import { RemoveScroll } from "react-remove-scroll"
 
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,8 @@ function SearchableSelect({
   placeholder,
   searchPlaceholder,
   emptyLabel,
+  onCreateOption,
+  createOptionLabel,
   className,
 }: {
   value?: string
@@ -28,6 +30,9 @@ function SearchableSelect({
   placeholder: string
   searchPlaceholder?: string
   emptyLabel: string
+  /** Offers creating the typed value when the search finds nothing. */
+  onCreateOption?: (value: string) => void
+  createOptionLabel?: (value: string) => string
   className?: string
 }) {
   const [open, setOpen] = React.useState(false)
@@ -50,6 +55,9 @@ function SearchableSelect({
     )
   }, [options, query])
 
+  const trimmedQuery = query.trim()
+  const canCreate = !!onCreateOption && trimmedQuery.length > 0 && filteredOptions.length === 0
+
   React.useEffect(() => {
     optionRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" })
   }, [activeIndex])
@@ -68,6 +76,12 @@ function SearchableSelect({
     setOpen(false)
   }
 
+  const createOption = () => {
+    if (!canCreate) return
+    onCreateOption?.(trimmedQuery)
+    setOpen(false)
+  }
+
   const handleSearchChange = (nextQuery: string) => {
     setQuery(nextQuery)
     setActiveIndex(0)
@@ -83,6 +97,9 @@ function SearchableSelect({
     } else if (event.key === "Enter" && filteredOptions[activeIndex]) {
       event.preventDefault()
       selectOption(filteredOptions[activeIndex].value)
+    } else if (event.key === "Enter" && canCreate) {
+      event.preventDefault()
+      createOption()
     }
   }
 
@@ -165,6 +182,16 @@ function SearchableSelect({
                   <span className="truncate">{option.label}</span>
                 </button>
               ))
+            )}
+            {canCreate && (
+              <button
+                type="button"
+                onClick={createOption}
+                className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm font-medium text-primary transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                <PlusIcon className="size-4 shrink-0"/>
+                <span className="truncate">{createOptionLabel?.(trimmedQuery) ?? trimmedQuery}</span>
+              </button>
             )}
           </RemoveScroll>
         </div>

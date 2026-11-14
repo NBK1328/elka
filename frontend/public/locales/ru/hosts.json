@@ -19,6 +19,7 @@
   "no_groups_found": "Группы не найдены.",
   "no_group": "Без группы",
   "new_group": "Создать группу",
+  "create_group_named": "Создать группу «{{name}}»",
   "filtered_group": "Группа: {{name}}",
   "clear_group_filter": "Сбросить фильтр группы",
   "new_tab": "Открыть список хостов в новой вкладке",

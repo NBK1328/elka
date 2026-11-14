@@ -1,7 +1,7 @@
 import { useState, useEffect, SyntheticEvent } from "react";
 import {useTranslation} from "react-i18next";
 import {ArrowDown, ArrowLeftRight, ArrowUp, Folder, Plus, Trash2} from "lucide-react";
-import {Host, ItemType, JumpHopMode, JumpHostHop, PortForward, PortForwardMode, SavedCredential} from "../../../bindings/elka-desktop/backend/internal/services/blob";
+import {Host, HostGroup, ItemType, JumpHopMode, JumpHostHop, PortForward, PortForwardMode, SavedCredential} from "../../../bindings/elka-desktop/backend/internal/services/blob";
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -20,7 +20,7 @@ import {credentialParts} from "@/lib/credentials";
 import {cn} from "@/lib/utils";
 import {useKeys} from "@/hooks/useKeys";
 import {useCredentials} from "@/hooks/useCredentials";
-import {useGroups} from "@/hooks/useGroups";
+import {useGroups, useSaveGroup} from "@/hooks/useGroups";
 import {useHosts} from "@/hooks/useHosts";
 
 const NO_GROUP_VALUE = "none";
@@ -67,6 +67,7 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
     const {data: keys} = useKeys();
     const {data: credentials} = useCredentials();
     const {data: groups} = useGroups();
+    const saveGroupMutation = useSaveGroup();
     const {data: hosts} = useHosts();
     const jumpHosts = (hosts || []).filter((host) => host.id !== formData.id);
     const selectedGroup = groups?.find((group) => group.name.trim().toLocaleLowerCase() === formData.group?.trim().toLocaleLowerCase());
@@ -186,6 +187,29 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
 
     const jumpHops = formData.jumpHops || [];
     const hasIncompleteJumpHop = jumpHops.some((hop) => !hopIsComplete(hop));
+
+    /** Creates a group from the search field and immediately assigns the host to it. */
+    const createGroup = async (groupName: string) => {
+        const name = groupName.trim();
+        if (!name) return;
+
+        const existing = groups?.find((group) =>
+            group.name.trim().toLocaleLowerCase() === name.toLocaleLowerCase());
+        if (existing) {
+            setFormData((current) => ({...current, group: existing.name}));
+            return;
+        }
+
+        try {
+            await saveGroupMutation.mutateAsync(new HostGroup({
+                type: ItemType.TypeGroup,
+                name,
+            }));
+            setFormData((current) => ({...current, group: name}));
+        } catch {
+            // useSaveGroup reports the failure to the user.
+        }
+    };
 
     const updateJumpHop = (index: number, update: Partial<JumpHostHop>) => {
         setFormData({
@@ -556,6 +580,10 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
                             placeholder={t("select_group", {ns: "hosts"})}
                             searchPlaceholder={t("search_group", {ns: "hosts"})}
                             emptyLabel={t("no_groups_found", {ns: "hosts"})}
+                            onCreateOption={(name) => {
+                                void createGroup(name);
+                            }}
+                            createOptionLabel={(name) => t("create_group_named", {ns: "hosts", name})}
                         />
                         {selectedGroup && groupCredential && (
                             <div className="grid gap-1 rounded-md border border-dashed border-border bg-muted/30 p-2.5 text-xs">
@@ -579,7 +607,7 @@ export function HostModal({isOpen, onClose, onSave, initialData, isSaving}: Host
                         <Button type="button" variant="outline" onClick={onClose} disabled={isSaving}>
                             {t("cancel", {ns: "common"})}
                         </Button>
-                        <Button type="submit" disabled={isSaving || hasIncompleteJumpHop}>
+                        <Button type="submit" disabled={isSaving || hasIncompleteJumpHop || saveGroupMutation.isPending}>
                             {isSaving ? t("saving", {ns: "common"}) : t("save_host")}
                         </Button>
                     </div>
