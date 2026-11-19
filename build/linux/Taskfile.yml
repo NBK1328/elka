@@ -159,16 +159,25 @@ tasks:
     summary: Creates a deb package
     cmds:
       - wails3 tool package -name "{{.APP_NAME}}" -format deb -config ./build/linux/nfpm/nfpm.yaml -out {{.ROOT_DIR}}/bin
+    env:
+      VERSION: '{{.VERSION | default "0.0.0"}}'
+      GOARCH: '{{.ARCH | default ARCH}}'
 
   generate:rpm:
     summary: Creates a rpm package
     cmds:
       - wails3 tool package -name "{{.APP_NAME}}" -format rpm -config ./build/linux/nfpm/nfpm.yaml -out {{.ROOT_DIR}}/bin
+    env:
+      VERSION: '{{.VERSION | default "0.0.0"}}'
+      GOARCH: '{{.ARCH | default ARCH}}'
 
   generate:aur:
-    summary: Creates a arch linux packager package
+    summary: Creates a arch linux package
     cmds:
       - wails3 tool package -name "{{.APP_NAME}}" -format archlinux -config ./build/linux/nfpm/nfpm.yaml -out {{.ROOT_DIR}}/bin
+    env:
+      VERSION: '{{.VERSION | default "0.0.0"}}'
+      GOARCH: '{{.ARCH | default ARCH}}'
 
   generate:dotdesktop:
     summary: Generates a `.desktop` file

@@ -76,7 +76,7 @@ What Elka adds:
 2. Download the installer for your platform:
    - **macOS** — `.pkg` (Apple Silicon);
    - **Windows** — `.exe` setup or portable `.zip`;
-   - **Linux** — `.AppImage`.
+   - **Linux** — `.AppImage`, `.deb` (Debian/Ubuntu) or `.pkg.tar.zst` (Arch).
 3. Install and launch the app.
 
 The macOS build is ad-hoc signed. If macOS blocks the first launch, right-click the app and choose **Open**.

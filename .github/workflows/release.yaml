@@ -75,7 +75,9 @@ jobs:
           retention-days: 1
 
   build-linux:
-    runs-on: ubuntu-latest
+    # Pin jammy: the packages are built here, and a newer glibc would make the
+    # .deb require a newer libc than Debian 12 and Ubuntu 22.04 ship.
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
       id-token: write
@@ -119,6 +121,19 @@ jobs:
 
           rm -f releases/*.nupkg releases/releases.*.json
 
+      - name: Package DEB and Arch Linux packages
+        shell: bash
+        env:
+          GOARCH: amd64
+          GIT_COMMITTER_NAME: ${{ github.actor }}
+          GIT_COMMITTER_EMAIL: ${{ github.actor }}@users.noreply.github.com
+        run: |
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@v2.44.1
+          mkdir -p releases
+
+          nfpm package -f build/linux/nfpm/nfpm.yaml -p deb -t releases/
+          nfpm package -f build/linux/nfpm/nfpm.yaml -p archlinux -t releases/
+
       - name: Get green checkmark
         uses: actions/attest@v4
         with:
@@ -131,6 +146,8 @@ jobs:
           name: installers-linux
           path: |
             releases/*.AppImage
+            releases/*.deb
+            releases/*.pkg.tar.zst
           if-no-files-found: error
           retention-days: 1
 
@@ -225,8 +242,8 @@ jobs:
             files+=("$f")
           done < <(find installers -type f | sort)
 
-          if [ "${#files[@]}" -ne 5 ]; then
-            echo "expected 5 installers, found ${#files[@]}: ${files[*]}" >&2
+          if [ "${#files[@]}" -ne 7 ]; then
+            echo "expected 7 installers, found ${#files[@]}: ${files[*]}" >&2
             exit 1
           fi
 
