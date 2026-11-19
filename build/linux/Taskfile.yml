@@ -13,6 +13,10 @@ vars:
   # Docker image for cross-compilation (used when building on non-Linux or no CC available)
   CROSS_IMAGE: wails-cross
 
+  # Wails v3's GTK4 backend needs GTK >= 4.10 (GtkFileDialog), which Debian 12
+  # and Ubuntu 22.04 do not ship, so Linux builds use the GTK3 backend by default.
+  DEFAULT_EXTRA_TAGS: gtk3
+
 tasks:
   build:
     summary: Builds the application for Linux
@@ -26,7 +30,7 @@ tasks:
           ARCH: '{{.ARCH}}'
           DEV: '{{.DEV}}'
           OUTPUT: '{{.OUTPUT}}'
-          EXTRA_TAGS: '{{.EXTRA_TAGS}}'
+          EXTRA_TAGS: '{{.EXTRA_TAGS | default .DEFAULT_EXTRA_TAGS}}'
     vars:
       DEFAULT_OUTPUT: '{{.BIN_DIR}}/{{.APP_NAME}}'
       OUTPUT: '{{ .OUTPUT | default .DEFAULT_OUTPUT }}'

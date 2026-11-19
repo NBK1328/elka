@@ -12,12 +12,12 @@ priority: "extra"
 maintainer: ${GIT_COMMITTER_NAME} <${GIT_COMMITTER_EMAIL}>
 description: "Elka SSH client"
 vendor: "Elka"
-license: "MIT"
+license: "AGPL-3.0"
 release: "1"
 
 contents:
   - src: "./bin/elka"
-    dst: "/usr/local/bin/elka"
+    dst: "/usr/bin/elka"
   - src: "./build/appicon.png"
     dst: "/usr/share/icons/hicolor/128x128/apps/elka.png"
   - src: "./build/linux/elka.desktop"
